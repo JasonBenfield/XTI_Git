@@ -7,21 +7,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{B2F4A454-8AE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{909008B1-39C0-4CBA-AE5E-BA0DDBE6579F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_Git.IntegrationTests", "Tests\XTI_Git.IntegrationTests\XTI_Git.IntegrationTests.csproj", "{E7E54731-826D-468A-B936-2CECE90D1E10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git.IntegrationTests", "Tests\XTI_Git.IntegrationTests\XTI_Git.IntegrationTests.csproj", "{E7E54731-826D-468A-B936-2CECE90D1E10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_Git", "Lib\XTI_Git\XTI_Git.csproj", "{02B50606-023A-4642-A0D5-68B016F1A7E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git", "Lib\XTI_Git\XTI_Git.csproj", "{02B50606-023A-4642-A0D5-68B016F1A7E8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_GitHub", "Lib\XTI_GitHub\XTI_GitHub.csproj", "{6B194359-E9CA-42C0-9377-1F34E866358B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_GitHub.Web", "Lib\XTI_GitHub.Web\XTI_GitHub.Web.csproj", "{80FE7816-5F0A-483C-9E7E-147997D9A4B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_Git.Abstractions", "Lib\XTI_Git.Abstractions\XTI_Git.Abstractions.csproj", "{E8F5BAB3-C966-4BA8-9FA5-8AB7EAD32F94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git.Abstractions", "Lib\XTI_Git.Abstractions\XTI_Git.Abstractions.csproj", "{E8F5BAB3-C966-4BA8-9FA5-8AB7EAD32F94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_Git.Tests", "Tests\XTI_Git.Tests\XTI_Git.Tests.csproj", "{566A514F-B285-4357-AB1A-BA49BB9D4C97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git.Tests", "Tests\XTI_Git.Tests\XTI_Git.Tests.csproj", "{566A514F-B285-4357-AB1A-BA49BB9D4C97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_GitHub.Fakes", "Lib\XTI_GitHub.Fakes\XTI_GitHub.Fakes.csproj", "{A1C91EC0-5B82-4012-B631-611BAE3CC979}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_GitHub.Fakes", "Lib\XTI_GitHub.Fakes\XTI_GitHub.Fakes.csproj", "{A1C91EC0-5B82-4012-B631-611BAE3CC979}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_Git.GitLib", "Lib\XTI_Git.GitLib\XTI_Git.GitLib.csproj", "{0EE4551B-CC48-47D9-8AC4-D04D7EEE11D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git.GitLib", "Lib\XTI_Git.GitLib\XTI_Git.GitLib.csproj", "{0EE4551B-CC48-47D9-8AC4-D04D7EEE11D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{509D826A-D389-461F-AB8C-7B8A2F332967}"
+	ProjectSection(SolutionItems) = preProject
+		git.ps1 = git.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
