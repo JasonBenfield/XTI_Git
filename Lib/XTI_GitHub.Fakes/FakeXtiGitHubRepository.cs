@@ -1,0 +1,157 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace XTI_GitHub.Fakes
+{
+    public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
+    {
+        private readonly List<string> branches = new List<string>();
+
+        public FakeXtiGitHubRepository(string repoOwner)
+            : base(repoOwner)
+        {
+        }
+
+        protected override Task<string> _DefaultBranchName() => Task.FromResult("main");
+
+        protected override Task<string[]> _Branches() => Task.FromResult(branches.ToArray());
+
+        protected override Task _CreateBranch(string name)
+        {
+            branches.Add(name);
+            return Task.CompletedTask;
+        }
+
+        private readonly List<GitHubMilestone> milestones = new List<GitHubMilestone>();
+
+        private int milestoneNumber = 321;
+
+        protected override Task _CreateMilestone(string name)
+        {
+            milestones.Add
+            (
+                new GitHubMilestone(milestoneNumber, name)
+            );
+            milestoneNumber++;
+            return Task.CompletedTask;
+        }
+
+        protected override Task<GitHubMilestone> _Milestone(int number)
+            => Task.FromResult(milestones.FirstOrDefault(m => m.Number == number));
+
+        protected override Task<GitHubMilestone[]> _Milestones()
+            => Task.FromResult(milestones.ToArray());
+
+        private readonly List<GitHubIssue> issues = new List<GitHubIssue>();
+
+        private int issueNumber = 234;
+
+        protected override Task<GitHubIssue[]> _Issues(FilterIssueRequest request)
+            => Task.FromResult(issues.Where(i => isMatch(request, i)).ToArray());
+
+        private bool isMatch(FilterIssueRequest request, GitHubIssue issue)
+        {
+            if (request.IncludeOpenOnly && !issue.IsOpen())
+            {
+                return false;
+            }
+            if (request.Milestone.HasValue && issue.MilestoneNumber != request.Milestone)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        protected override Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle)
+        {
+            var issueRecord = new GitHubIssue
+            (
+                issueNumber,
+                issueTitle,
+                milestoneNumber,
+                "Open",
+                new string[] { },
+                new string[] { }
+            );
+            issues.Add(issueRecord);
+            issueNumber++;
+            return Task.FromResult(issueRecord);
+        }
+
+        private readonly List<string> labels = new List<string>();
+
+        protected override Task<bool> _LabelExists(string name)
+        {
+            var exists = labels.Any(l => l == name);
+            return Task.FromResult(exists);
+        }
+
+        protected override Task _CreateLabel(string name, string color)
+        {
+            labels.Add(name);
+            return Task.CompletedTask;
+        }
+
+        protected override Task<GitHubIssue> _Issue(int number)
+        {
+            var issue = issues.FirstOrDefault(iss => iss.Number == number);
+            return Task.FromResult(issue);
+        }
+
+        protected override Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate)
+        {
+            var updatedIssue = ghIssue with
+            {
+                MilestoneNumber = ghIssueUpdate.MilestoneNumber ?? 0,
+                State = ghIssueUpdate.State,
+                Labels = ghIssueUpdate.Labels,
+                Assignees = ghIssueUpdate.Assignees
+            };
+            replaceIssue(ghIssue, updatedIssue);
+            return Task.CompletedTask;
+        }
+
+        private void replaceIssue(GitHubIssue issue, GitHubIssue updatedIssue)
+        {
+            issues.RemoveAll(iss => iss.Number == issue.Number);
+            issues.Add(updatedIssue);
+        }
+
+        private readonly List<GitHubPullRequest> pullRequests = new List<GitHubPullRequest>();
+
+        protected override Task<GitHubPullRequest[]> _PullRequests()
+            => Task.FromResult(pullRequests.ToArray());
+
+        private int pullRequestID = 454;
+
+        protected override Task<GitHubPullRequest> _CreatePullRequest(string title, string body, string head, string baseRef)
+        {
+            var pullRequest = new GitHubPullRequest(pullRequestID, title, body, head, baseRef, "Open");
+            pullRequests.Add(pullRequest);
+            pullRequestID++;
+            return Task.FromResult(pullRequest);
+        }
+
+        protected override Task _MergePullRequest(GitHubPullRequest pullRequest)
+        {
+            var updatedPullRequest = pullRequest with { State = "Closed" };
+            pullRequests.RemoveAll(pr => pr.Number == pullRequest.Number);
+            pullRequests.Add(updatedPullRequest);
+            return Task.CompletedTask;
+        }
+
+        protected override Task _LinkPullRequest(GitHubPullRequest ghPullRequest, GitHubIssue ghIssue)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task _CloseMilestone(GitHubMilestone milestone)
+        {
+            var updated = milestone with { State = "Closed" };
+            milestones.RemoveAll(m => m.Number == milestone.Number);
+            milestones.Add(updated);
+            return Task.CompletedTask;
+        }
+    }
+}

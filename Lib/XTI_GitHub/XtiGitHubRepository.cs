@@ -1,0 +1,206 @@
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using XTI_Git.Abstractions;
+
+namespace XTI_GitHub
+{
+    public abstract class XtiGitHubRepository
+    {
+        protected readonly string repoOwner;
+
+        protected XtiGitHubRepository(string repoOwner)
+        {
+            this.repoOwner = repoOwner;
+        }
+
+        public Task<string> DefaultBranchName() => _DefaultBranchName();
+
+        protected abstract Task<string> _DefaultBranchName();
+
+        public async Task CreateNewVersion(XtiGitVersion newVersion)
+        {
+            var branchName = newVersion.BranchName().Value;
+            if (!await branchExists(branchName))
+            {
+                await _CreateBranch(branchName);
+            }
+            var milestoneName = newVersion.MilestoneName().Value;
+            if (!await milestoneExists(milestoneName))
+            {
+                await _CreateMilestone(milestoneName);
+            }
+        }
+
+        public Task<GitHubIssue[]> Issues() => _Issues(new FilterIssueRequest());
+
+        protected abstract Task<GitHubIssue[]> _Issues(FilterIssueRequest request);
+
+        public async Task<GitHubIssue> CreateIssue(XtiGitVersion version, string issueTitle)
+        {
+            var openIssues = await _Issues(new FilterIssueRequest { IncludeOpenOnly = true });
+            var issue = openIssues.FirstOrDefault(iss => iss.Title.Equals(issueTitle));
+            if (issue == null)
+            {
+                var milestones = await Milestones();
+                var milestoneName = version.MilestoneName().Value;
+                var milestone = milestones
+                    .Where(m => m.Title.Equals(milestoneName))
+                    .Select(m => m.Number)
+                    .FirstOrDefault();
+                issue = await _CreateIssue(milestone, issueTitle);
+            }
+            return issue;
+        }
+
+        protected abstract Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle);
+
+        private const string inProgress = "in progress";
+
+        public async Task<GitHubIssue> StartIssue(XtiGitVersion version, int issueNumber)
+        {
+            var exists = await _LabelExists(inProgress);
+            if (!exists)
+            {
+                await _CreateLabel(inProgress, "0E8A16");
+            }
+            var issue = await _Issue(issueNumber);
+            var update = issue.ToUpdate();
+            if (!issue.Labels.Any(l => l == inProgress))
+            {
+                update.AddLabel(inProgress);
+            }
+            if (!issue.Assignees.Any(a => a.Equals(repoOwner, StringComparison.OrdinalIgnoreCase)))
+            {
+                update.AddAssignee(repoOwner);
+            }
+            var milestone = await getMilestone(version.MilestoneName().Value);
+            if (issue.MilestoneNumber != milestone.Number)
+            {
+                update.MilestoneNumber = milestone.Number;
+            }
+            await _UpdateIssue(issue, update);
+            return issue;
+        }
+
+        private const string closePending = "close pending";
+
+        public async Task CompleteIssue(XtiIssueBranchName issueBranchName)
+        {
+            if (!await _LabelExists(closePending))
+            {
+                await _CreateLabel(closePending, "BFD4F2");
+            }
+            var issue = await _Issue(issueBranchName.IssueNumber);
+            var update = issue.ToUpdate();
+            if (issue.Labels.Contains(inProgress))
+            {
+                update.RemoveLabel(inProgress);
+            }
+            if (!issue.Labels.Contains(closePending))
+            {
+                update.AddLabel(closePending);
+            }
+            await _UpdateIssue(issue, update);
+            var milestone = await _Milestone(issue.MilestoneNumber);
+            var milestoneName = XtiMilestoneName.Parse(milestone.Title);
+            var pullRequest = await _CreatePullRequest
+            (
+                $"Pull Request for {issue.Title}",
+                $"Closes #{issue.Number}",
+                issueBranchName.Value,
+                new XtiVersionBranchName(milestoneName.Version).Value
+            );
+            await _MergePullRequest(pullRequest);
+            await _LinkPullRequest(pullRequest, issue);
+        }
+
+        protected abstract Task _LinkPullRequest(GitHubPullRequest ghPullRequest, GitHubIssue ghIssue);
+
+        public async Task CompleteVersion(XtiVersionBranchName versionBranchName)
+        {
+            var milestone = await getMilestone(new XtiMilestoneName(versionBranchName.Version).Value);
+            var milestoneIssues = await _Issues
+            (
+                new FilterIssueRequest
+                {
+                    Milestone = milestone.Number,
+                    IncludeOpenOnly = true
+                }
+            );
+            var defaultBranchName = await DefaultBranchName();
+            var pullRequest = await _CreatePullRequest
+            (
+                $"Pull Request for {versionBranchName.Version.Key}",
+                "",
+                versionBranchName.Value,
+                defaultBranchName
+            );
+            await _MergePullRequest(pullRequest);
+            foreach (var milestoneIssue in milestoneIssues)
+            {
+                await close(milestoneIssue);
+            }
+            await _CloseMilestone(milestone);
+        }
+
+        protected abstract Task _CloseMilestone(GitHubMilestone milestone);
+
+        private Task close(GitHubIssue ghIssue)
+        {
+            var update = ghIssue.ToUpdate();
+            update.Close();
+            update.RemoveLabel(closePending);
+            return _UpdateIssue(ghIssue, update);
+        }
+
+        protected abstract Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate);
+
+        protected abstract Task<GitHubMilestone> _Milestone(int number);
+
+        protected abstract Task<bool> _LabelExists(string name);
+
+        protected abstract Task _CreateLabel(string name, string color);
+
+        protected abstract Task<GitHubIssue> _Issue(int number);
+
+        public Task<GitHubPullRequest[]> PullRequests() => _PullRequests();
+
+        protected abstract Task<GitHubPullRequest[]> _PullRequests();
+
+        protected abstract Task<GitHubPullRequest> _CreatePullRequest(string title, string body, string head, string baseRef);
+
+        protected abstract Task _MergePullRequest(GitHubPullRequest pullRequest);
+
+        public Task<string[]> Branches() => _Branches();
+
+        private async Task<bool> branchExists(string name)
+        {
+            var branches = await _Branches();
+            return branches.Any(b => b.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        protected abstract Task<string[]> _Branches();
+
+        protected abstract Task _CreateBranch(string name);
+
+        public Task<GitHubMilestone[]> Milestones() => _Milestones();
+
+        private async Task<bool> milestoneExists(string title)
+        {
+            var milestone = await getMilestone(title);
+            return milestone != null;
+        }
+
+        private async Task<GitHubMilestone> getMilestone(string title)
+        {
+            var milestones = await _Milestones();
+            return milestones.FirstOrDefault(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+        }
+
+        protected abstract Task<GitHubMilestone[]> _Milestones();
+
+        protected abstract Task _CreateMilestone(string name);
+
+    }
+}
