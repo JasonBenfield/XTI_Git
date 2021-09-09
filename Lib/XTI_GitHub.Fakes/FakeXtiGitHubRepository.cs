@@ -56,27 +56,28 @@ namespace XTI_GitHub.Fakes
             {
                 return false;
             }
-            if (request.Milestone.HasValue && issue.MilestoneNumber != request.Milestone)
+            if (request.Milestone.HasValue && issue.Milestone.Number != request.Milestone)
             {
                 return false;
             }
             return true;
         }
 
-        protected override Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle)
+        protected override async Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle)
         {
-            var issueRecord = new GitHubIssue
+            var milestone = await _Milestone(milestoneNumber);
+            var gitHubIssue = new GitHubIssue
             (
                 issueNumber,
                 issueTitle,
-                milestoneNumber,
+                milestone,
                 "Open",
                 new string[] { },
                 new string[] { }
             );
-            issues.Add(issueRecord);
+            issues.Add(gitHubIssue);
             issueNumber++;
-            return Task.FromResult(issueRecord);
+            return gitHubIssue;
         }
 
         private readonly List<string> labels = new List<string>();
@@ -99,17 +100,17 @@ namespace XTI_GitHub.Fakes
             return Task.FromResult(issue);
         }
 
-        protected override Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate)
+        protected override async Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate)
         {
+            var milestone = await _Milestone(ghIssueUpdate.MilestoneNumber ?? 0);
             var updatedIssue = ghIssue with
             {
-                MilestoneNumber = ghIssueUpdate.MilestoneNumber ?? 0,
+                Milestone = milestone,
                 State = ghIssueUpdate.State,
                 Labels = ghIssueUpdate.Labels,
                 Assignees = ghIssueUpdate.Assignees
             };
             replaceIssue(ghIssue, updatedIssue);
-            return Task.CompletedTask;
         }
 
         private void replaceIssue(GitHubIssue issue, GitHubIssue updatedIssue)

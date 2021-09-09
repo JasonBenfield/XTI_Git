@@ -10,6 +10,7 @@ using XTI_Git.Abstractions;
 using XTI_Git.GitLib;
 using XTI_GitHub;
 using XTI_GitHub.Web;
+using XTI_Secrets;
 using XTI_Secrets.Extensions;
 using XTI_Secrets.Files;
 
@@ -24,7 +25,7 @@ namespace XTI_Git.IntegrationTests
         {
             var services = await setup();
             var repo = getGitHubRepo(services);
-            var newVersion = new XtiGitVersion("Patch", "V1");
+            var newVersion = new XtiGitVersion("Patch", "V13");
             await repo.CreateNewVersion(newVersion);
             var branches = await repo.Branches();
             var newVersionBranch = branches.FirstOrDefault(b => b == $"xti/{newVersion.Type}/{newVersion.Key}");
@@ -106,7 +107,7 @@ namespace XTI_Git.IntegrationTests
         {
             var sp = configureServices();
             var gitHubRepo = (WebXtiGitHubRepository)sp.GetService<XtiGitHubRepository>();
-            var credentialsFactory = sp.GetService<SharedFileSecretCredentialsFactory>();
+            var credentialsFactory = sp.GetService<ISecretCredentialsFactory>();
             var credentials = credentialsFactory.Create("GitHub");
             var credentialsValue = await credentials.Value();
             gitHubRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
@@ -130,9 +131,10 @@ namespace XTI_Git.IntegrationTests
                     (hostContext, services) =>
                     {
                         services.AddXtiDataProtection();
-                        services.AddSharedFileSecretCredentials();
+                        services.AddFileSecretCredentials();
                         services.AddScoped<XtiGitHubRepository>(sp =>
                         {
+                            return new WebXtiGitHubRepository("JasonBenfield", "SharedWebApp");
                             return new WebXtiGitHubRepository("JasonBenfield", "XTI_GitLab");
                         });
                         services.AddScoped<XtiGitRepository>(sp =>

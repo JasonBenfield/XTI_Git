@@ -10,10 +10,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
-    <PackageReference Include="XTI_Configuration.Extensions" Version="1.8.13" />
-    <PackageReference Include="XTI_Secrets.Extensions" Version="1.7.5" />
+    <PackageReference Include="XTI_Configuration.Extensions" Version="1.8.14" />
+    <PackageReference Include="XTI_Secrets.Extensions" Version="1.7.7" />
   </ItemGroup>
 
   <ItemGroup>

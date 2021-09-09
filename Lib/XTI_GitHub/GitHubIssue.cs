@@ -7,7 +7,7 @@ namespace XTI_GitHub
     (
         int Number,
         string Title,
-        int MilestoneNumber,
+        GitHubMilestone Milestone,
         string State,
         string[] Labels,
         string[] Assignees
