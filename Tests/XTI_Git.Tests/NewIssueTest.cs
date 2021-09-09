@@ -53,8 +53,8 @@ namespace XTI_Git.Tests
             const string issueTitle = "Test Issue";
             await repo.CreateIssue(newVersion, issueTitle);
             var issues = await repo.Issues();
-            Assert.That(issues[0].MilestoneNumber, Is.GreaterThan(0), "Should create new issue for milestone");
-            Assert.That(issues[0].MilestoneNumber, Is.EqualTo(milestone.Number), "Should create new issue for milestone");
+            Assert.That(issues[0].Milestone.Number, Is.GreaterThan(0), "Should create new issue for milestone");
+            Assert.That(issues[0].Milestone.Number, Is.EqualTo(milestone.Number), "Should create new issue for milestone");
         }
 
         [Test]

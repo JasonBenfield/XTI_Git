@@ -32,9 +32,26 @@ namespace XTI_GitHub
             }
         }
 
+        public async Task<GitHubIssue[]> OpenIssues(GitHubMilestone milestone)
+        {
+            var issues = await _Issues
+            (
+                new FilterIssueRequest
+                {
+                    IncludeOpenOnly = true,
+                    Milestone = milestone.Number
+                }
+            );
+            return issues
+                .Where(iss => !iss.Labels.Contains(closePending))
+                .ToArray();
+        }
+
         public Task<GitHubIssue[]> Issues() => _Issues(new FilterIssueRequest());
 
         protected abstract Task<GitHubIssue[]> _Issues(FilterIssueRequest request);
+
+        public Task<GitHubIssue> Issue(int issueNumber) => _Issue(issueNumber);
 
         public async Task<GitHubIssue> CreateIssue(XtiGitVersion version, string issueTitle)
         {
@@ -75,7 +92,7 @@ namespace XTI_GitHub
                 update.AddAssignee(repoOwner);
             }
             var milestone = await getMilestone(version.MilestoneName().Value);
-            if (issue.MilestoneNumber != milestone.Number)
+            if (issue.Milestone.Number != milestone.Number)
             {
                 update.MilestoneNumber = milestone.Number;
             }
@@ -102,8 +119,7 @@ namespace XTI_GitHub
                 update.AddLabel(closePending);
             }
             await _UpdateIssue(issue, update);
-            var milestone = await _Milestone(issue.MilestoneNumber);
-            var milestoneName = XtiMilestoneName.Parse(milestone.Title);
+            var milestoneName = XtiMilestoneName.Parse(issue.Milestone.Title);
             var pullRequest = await _CreatePullRequest
             (
                 $"Pull Request for {issue.Title}",
@@ -185,6 +201,8 @@ namespace XTI_GitHub
         protected abstract Task _CreateBranch(string name);
 
         public Task<GitHubMilestone[]> Milestones() => _Milestones();
+
+        public Task<GitHubMilestone> Milestone(string title) => getMilestone(title);
 
         private async Task<bool> milestoneExists(string title)
         {

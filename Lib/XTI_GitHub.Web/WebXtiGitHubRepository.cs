@@ -40,7 +40,7 @@ namespace XTI_GitHub.Web
         {
             var repo = await client.Repository.Get(repoOwner, repoName);
             var defaultBranch = await client.Git.Reference.Get(repoOwner, repoName, $"heads/{repo.DefaultBranch}");
-            await client.Git.Reference.Create(repoOwner, repoName, new NewReference("refs/heads/" + name, defaultBranch.Object.Sha));
+            await client.Git.Reference.Create(repoOwner, repoName, new NewReference($"refs/heads/{name}", defaultBranch.Object.Sha));
         }
 
         protected override async Task<GitHubMilestone[]> _Milestones()
@@ -54,7 +54,7 @@ namespace XTI_GitHub.Web
         protected override async Task<GitHubMilestone> _Milestone(int number)
         {
             var milestone = await client.Issue.Milestone.Get(repoOwner, repoName, number);
-            return new GitHubMilestone(milestone.Number, milestone.Title);
+            return createGitHubMilestone(milestone);
         }
 
         protected override Task _CreateMilestone(string name)
@@ -100,11 +100,18 @@ namespace XTI_GitHub.Web
             (
                 issue.Number,
                 issue.Title,
-                issue.Milestone?.Number ?? 0,
+                createGitHubMilestone(issue.Milestone),
                 issue.State.StringValue,
                 issue.Labels.Select(l => l.Name).ToArray(),
                 issue.Assignees.Select(a => a.Login).ToArray()
             );
+        }
+
+        private static GitHubMilestone createGitHubMilestone(Milestone milestone)
+        {
+            return milestone == null
+                ? new GitHubMilestone(0, "")
+                : new GitHubMilestone(milestone.Number, milestone.Title, milestone.State.StringValue);
         }
 
         protected override async Task<bool> _LabelExists(string name)

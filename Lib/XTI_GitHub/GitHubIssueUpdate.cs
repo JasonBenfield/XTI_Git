@@ -6,7 +6,7 @@ namespace XTI_GitHub
     {
         internal GitHubIssueUpdate(GitHubIssue source)
         {
-            MilestoneNumber = source.MilestoneNumber;
+            MilestoneNumber = source.Milestone.Number;
             State = source.State;
             Labels = source.Labels;
             Assignees = source.Assignees;
