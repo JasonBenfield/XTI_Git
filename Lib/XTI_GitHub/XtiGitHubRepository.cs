@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using XTI_Git.Abstractions;
@@ -220,5 +221,42 @@ namespace XTI_GitHub
 
         protected abstract Task _CreateMilestone(string name);
 
+        public Task<GitHubRelease> Release(string tagName) => _Release(tagName);
+
+        protected abstract Task<GitHubRelease> _Release(string tagName);
+
+        public async Task<GitHubRelease> CreateRelease(string tagName, string name, string body, params FileUpload[] assets)
+        {
+            var release = await _Release(tagName);
+            if (release == null)
+            {
+                release = await _CreateRelease(tagName, name, body);
+            }
+            else
+            {
+                foreach (var asset in release.Assets)
+                {
+                    await _DeleteReleaseAsset(asset);
+                }
+            }
+            foreach (var asset in assets)
+            {
+                await _UploadReleaseAsset(release, asset);
+            }
+            await _FinalizeRelease(release);
+            return release;
+        }
+
+        protected abstract Task<GitHubRelease> _CreateRelease(string tagName, string name, string body);
+
+        protected abstract Task _DeleteReleaseAsset(GitHubReleaseAsset asset);
+
+        protected abstract Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset);
+
+        protected abstract Task _FinalizeRelease(GitHubRelease release);
+
+        public Task<byte[]> DownloadReleaseAsset(GitHubReleaseAsset asset) => _DownloadReleaseAsset(asset);
+
+        protected abstract Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset);
     }
 }

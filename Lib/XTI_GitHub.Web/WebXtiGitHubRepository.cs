@@ -1,6 +1,9 @@
 ﻿using Octokit;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace XTI_GitHub.Web
@@ -212,5 +215,61 @@ namespace XTI_GitHub.Web
             };
             await client.Issue.Milestone.Update(repoOwner, repoName, milestone.Number, update);
         }
+
+        protected override async Task<GitHubRelease> _Release(string tagName)
+        {
+            var release = await client.Repository.Release.Get(repoOwner, repoName, tagName);
+            return createGitHubRelease(release);
+        }
+
+        protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
+        {
+            var newRelease = new NewRelease(tagName);
+            newRelease.Name = name;
+            newRelease.Body = body;
+            newRelease.Draft = true;
+            var release = await client.Repository.Release.Create(repoOwner, repoName, newRelease);
+            return createGitHubRelease(release);
+        }
+
+        private static GitHubRelease createGitHubRelease(Release release)
+        {
+            return new GitHubRelease
+            (
+                release.Id,
+                release.TagName,
+                release.Assets
+                    .Select(a => new GitHubReleaseAsset(a.Id, a.ContentType, a.Url))
+                    .ToArray()
+            );
+        }
+
+        protected override Task _DeleteReleaseAsset(GitHubReleaseAsset asset)
+            => client.Repository.Release.DeleteAsset(repoOwner, repoName, asset.ID);
+
+        protected override async Task _UploadReleaseAsset(GitHubRelease gitHubRelease, FileUpload asset)
+        {
+            var release = await getRelease(gitHubRelease);
+            var upload = new ReleaseAssetUpload(asset.FileName, asset.ContentType, asset.Stream, null);
+            await client.Repository.Release.UploadAsset(release, upload);
+        }
+
+        protected override async Task _FinalizeRelease(GitHubRelease gitHubRelease)
+        {
+            var release = await getRelease(gitHubRelease);
+            var update = release.ToUpdate();
+            update.Draft = false;
+            await client.Repository.Release.Edit(repoOwner, repoName, release.Id, update);
+        }
+
+        protected override async Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset)
+        {
+            var response = await client.Connection.Get<object>(new Uri(asset.Url), new Dictionary<string, string>(), "application/octet-stream");
+            return (byte[])response.Body;
+        }
+
+        private Task<Release> getRelease(GitHubRelease gitHubRelease)
+            => client.Repository.Release.Get(repoOwner, repoName, gitHubRelease.ID);
+
     }
 }
