@@ -39,11 +39,15 @@ namespace XTI_Git.IntegrationTests
             var repo = getGitHubRepo(services);
             var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, "hub.zip");
             using var stream = new MemoryStream(File.ReadAllBytes(path));
-            await repo.CreateRelease
+            var release = await repo.CreateRelease
             (
                 "v1.1-alpha",
                 "Test Upload",
-                "Testing",
+                "Testing"
+            );
+            await repo.UploadReleaseAsset
+            (
+                release,
                 new FileUpload(stream, "test1.zip", "application/zip")
             );
         }

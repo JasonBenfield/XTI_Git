@@ -225,35 +225,20 @@ namespace XTI_GitHub
 
         protected abstract Task<GitHubRelease> _Release(string tagName);
 
-        public async Task<GitHubRelease> CreateRelease(string tagName, string name, string body, params FileUpload[] assets)
-        {
-            var release = await _Release(tagName);
-            if (release == null)
-            {
-                release = await _CreateRelease(tagName, name, body);
-            }
-            else
-            {
-                foreach (var asset in release.Assets)
-                {
-                    await _DeleteReleaseAsset(asset);
-                }
-            }
-            foreach (var asset in assets)
-            {
-                await _UploadReleaseAsset(release, asset);
-            }
-            await _FinalizeRelease(release);
-            return release;
-        }
+        public Task<GitHubRelease> CreateRelease(string tagName, string name, string body)
+            => _CreateRelease(tagName, name, body);
 
         protected abstract Task<GitHubRelease> _CreateRelease(string tagName, string name, string body);
+
+        public Task DeleteReleaseAsset(GitHubReleaseAsset asset) => _DownloadReleaseAsset(asset);
 
         protected abstract Task _DeleteReleaseAsset(GitHubReleaseAsset asset);
 
         public Task UploadReleaseAsset(GitHubRelease release, FileUpload asset) => _UploadReleaseAsset(release, asset);
 
         protected abstract Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset);
+
+        public Task FinalizeRelease(GitHubRelease release) => _FinalizeRelease(release);
 
         protected abstract Task _FinalizeRelease(GitHubRelease release);
 
