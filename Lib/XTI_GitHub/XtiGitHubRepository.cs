@@ -251,6 +251,8 @@ namespace XTI_GitHub
 
         protected abstract Task _DeleteReleaseAsset(GitHubReleaseAsset asset);
 
+        public Task UploadReleaseAsset(GitHubRelease release, FileUpload asset) => _UploadReleaseAsset(release, asset);
+
         protected abstract Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset);
 
         protected abstract Task _FinalizeRelease(GitHubRelease release);

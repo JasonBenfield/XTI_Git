@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NUnit.Framework;
+using System;
+using System.IO;
 using System.Threading.Tasks;
+using XTI_Configuration.Extensions;
+using XTI_Git.GitLib;
 using XTI_GitHub;
 using XTI_GitHub.Web;
 using XTI_Secrets;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using XTI_Configuration.Extensions;
 using XTI_Secrets.Extensions;
-using XTI_Git.GitLib;
-using NUnit.Framework;
-using XTI_Git.Abstractions;
-using System.IO;
 
 namespace XTI_Git.IntegrationTests
 {
