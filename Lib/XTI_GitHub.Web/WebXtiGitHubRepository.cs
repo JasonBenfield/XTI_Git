@@ -1,9 +1,7 @@
 ﻿using Octokit;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace XTI_GitHub.Web
@@ -218,8 +216,17 @@ namespace XTI_GitHub.Web
 
         protected override async Task<GitHubRelease> _Release(string tagName)
         {
-            var release = await client.Repository.Release.Get(repoOwner, repoName, tagName);
-            return createGitHubRelease(release);
+            GitHubRelease gitHubRelease;
+            try
+            {
+                var release = await client.Repository.Release.Get(repoOwner, repoName, tagName);
+                gitHubRelease = createGitHubRelease(release);
+            }
+            catch (NotFoundException)
+            {
+                gitHubRelease = null;
+            }
+            return gitHubRelease;
         }
 
         protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
