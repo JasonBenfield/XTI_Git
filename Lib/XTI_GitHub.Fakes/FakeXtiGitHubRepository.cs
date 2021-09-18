@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -153,6 +154,40 @@ namespace XTI_GitHub.Fakes
             milestones.RemoveAll(m => m.Number == milestone.Number);
             milestones.Add(updated);
             return Task.CompletedTask;
+        }
+
+        private int releaseID = 2233;
+        private readonly List<GitHubRelease> releases = new List<GitHubRelease>();
+
+        protected override Task<GitHubRelease> _Release(string tagName)
+        {
+            var release = releases.FirstOrDefault(r => r.TagName == tagName);
+            return Task.FromResult(release);
+        }
+
+        protected override Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
+        {
+            var release = new GitHubRelease(releaseID, tagName, new GitHubReleaseAsset[] { });
+            releaseID++;
+            releases.Add(release);
+            return Task.FromResult(release);
+        }
+
+        protected override Task _DeleteReleaseAsset(GitHubReleaseAsset asset) => Task.CompletedTask;
+
+        protected override Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task _FinalizeRelease(GitHubRelease release)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset)
+        {
+            return Task.FromResult(new byte[] { });
         }
     }
 }
