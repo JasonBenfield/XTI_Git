@@ -249,7 +249,7 @@ namespace XTI_GitHub.Web
                 release.Id,
                 release.TagName,
                 release.Assets
-                    .Select(a => new GitHubReleaseAsset(a.Id, a.ContentType, a.Url))
+                    .Select(a => new GitHubReleaseAsset(a.Id, a.Name, a.ContentType, a.Url))
                     .ToArray()
             );
         }
