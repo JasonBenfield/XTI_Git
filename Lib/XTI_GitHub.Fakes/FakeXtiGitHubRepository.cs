@@ -165,6 +165,12 @@ namespace XTI_GitHub.Fakes
             return Task.FromResult(release);
         }
 
+        protected override Task _DeleteRelease(GitHubRelease gitHubRelease)
+        {
+            releases.RemoveAll(r => r.ID == gitHubRelease.ID);
+            return Task.CompletedTask;
+        }
+
         protected override Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
         {
             var release = new GitHubRelease(releaseID, tagName, new GitHubReleaseAsset[] { });

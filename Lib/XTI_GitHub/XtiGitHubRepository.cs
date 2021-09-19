@@ -225,6 +225,10 @@ namespace XTI_GitHub
 
         protected abstract Task<GitHubRelease> _Release(string tagName);
 
+        public Task DeleteRelease(GitHubRelease gitHubRelease) => _DeleteRelease(gitHubRelease);
+
+        protected abstract Task _DeleteRelease(GitHubRelease gitHubRelease);
+
         public Task<GitHubRelease> CreateRelease(string tagName, string name, string body)
             => _CreateRelease(tagName, name, body);
 

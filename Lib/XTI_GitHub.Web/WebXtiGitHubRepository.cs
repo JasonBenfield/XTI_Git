@@ -229,6 +229,9 @@ namespace XTI_GitHub.Web
             return gitHubRelease;
         }
 
+        protected override Task _DeleteRelease(GitHubRelease gitHubRelease)
+            => client.Repository.Release.Delete(repoOwner, repoName, gitHubRelease.ID);
+
         protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
         {
             var newRelease = new NewRelease(tagName);
