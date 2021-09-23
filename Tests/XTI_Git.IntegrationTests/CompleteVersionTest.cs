@@ -9,21 +9,21 @@ using XTI_Git.Abstractions;
 using XTI_Git.GitLib;
 using XTI_GitHub;
 using XTI_GitHub.Web;
+using XTI_Secrets;
 using XTI_Secrets.Extensions;
-using XTI_Secrets.Files;
 
 namespace XTI_Git.IntegrationTests
 {
     public sealed class CompleteVersionTest
     {
-        private static readonly string gitRepoPath = "C:\\XTI\\src\\XTI_GitLab";
+        private static readonly string gitRepoPath = "C:\\XTI\\src\\HubWebApp";
 
         [Test]
         public async Task ShouldCompleteVersion()
         {
             var services = await setup();
             var repo = getGitHubRepo(services);
-            var newVersion = new XtiGitVersion("Patch", "V19");
+            var newVersion = new XtiGitVersion("Minor", "V1169");
             await repo.CreateNewVersion(newVersion);
             var gitRepo = getGitRepo(services);
             gitRepo.CheckoutBranch(newVersion.BranchName().Value);
@@ -52,11 +52,20 @@ namespace XTI_Git.IntegrationTests
             gitRepo.DeleteBranch(newVersion.BranchName().Value);
         }
 
+        [Test]
+        public async Task ShouldCompleteHubVersion()
+        {
+            var services = await setup();
+            var repo = getGitHubRepo(services);
+            var newVersion = new XtiGitVersion("Minor", "V1169");
+            await repo.CompleteVersion(newVersion.BranchName());
+        }
+
         private async Task<IServiceProvider> setup()
         {
             var sp = configureServices();
             var gitHubRepo = (WebXtiGitHubRepository)sp.GetService<XtiGitHubRepository>();
-            var credentialsFactory = sp.GetService<SharedFileSecretCredentialsFactory>();
+            var credentialsFactory = sp.GetService<SharedSecretCredentialsFactory>();
             var credentials = credentialsFactory.Create("GitHub");
             var credentialsValue = await credentials.Value();
             gitHubRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
@@ -83,7 +92,8 @@ namespace XTI_Git.IntegrationTests
                         services.AddSharedFileSecretCredentials();
                         services.AddScoped<XtiGitHubRepository>(sp =>
                         {
-                            return new WebXtiGitHubRepository("JasonBenfield", "XTI_GitLab");
+                            //return new WebXtiGitHubRepository("JasonBenfield", "XTI_GitLab");
+                            return new WebXtiGitHubRepository("JasonBenfield", "HubWebApp");
                         });
                         services.AddScoped<XtiGitRepository>(sp =>
                         {

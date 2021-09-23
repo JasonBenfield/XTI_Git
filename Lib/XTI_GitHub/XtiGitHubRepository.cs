@@ -137,28 +137,43 @@ namespace XTI_GitHub
         public async Task CompleteVersion(XtiVersionBranchName versionBranchName)
         {
             var milestone = await getMilestone(new XtiMilestoneName(versionBranchName.Version).Value);
-            var milestoneIssues = await _Issues
-            (
-                new FilterIssueRequest
-                {
-                    Milestone = milestone.Number,
-                    IncludeOpenOnly = true
-                }
-            );
+            GitHubIssue[] milestoneIssues;
+            if (milestone == null)
+            {
+                milestoneIssues = new GitHubIssue[] { };
+            }
+            else
+            {
+                milestoneIssues = await _Issues
+                (
+                    new FilterIssueRequest
+                    {
+                        Milestone = milestone.Number,
+                        IncludeOpenOnly = true
+                    }
+                );
+            }
             var defaultBranchName = await DefaultBranchName();
-            var pullRequest = await _CreatePullRequest
-            (
-                $"Pull Request for {versionBranchName.Version.Key}",
-                "",
-                versionBranchName.Value,
-                defaultBranchName
-            );
-            await _MergePullRequest(pullRequest);
+            var branches = await _Branches();
+            if (branches.Any(b => b.Equals(versionBranchName.Value, StringComparison.OrdinalIgnoreCase)))
+            {
+                var pullRequest = await _CreatePullRequest
+                (
+                    $"Pull Request for {versionBranchName.Version.Key}",
+                    "",
+                    versionBranchName.Value,
+                    defaultBranchName
+                );
+                await _MergePullRequest(pullRequest);
+            }
             foreach (var milestoneIssue in milestoneIssues)
             {
                 await close(milestoneIssue);
             }
-            await _CloseMilestone(milestone);
+            if (milestone != null)
+            {
+                await _CloseMilestone(milestone);
+            }
         }
 
         protected abstract Task _CloseMilestone(GitHubMilestone milestone);
