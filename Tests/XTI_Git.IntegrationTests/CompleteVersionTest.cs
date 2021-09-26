@@ -6,17 +6,16 @@ using System.IO;
 using System.Threading.Tasks;
 using XTI_Configuration.Extensions;
 using XTI_Git.Abstractions;
-using XTI_Git.GitLib;
 using XTI_GitHub;
 using XTI_GitHub.Web;
 using XTI_Secrets;
-using XTI_Secrets.Extensions;
 
 namespace XTI_Git.IntegrationTests
 {
     public sealed class CompleteVersionTest
     {
         private static readonly string gitRepoPath = "C:\\XTI\\src\\HubWebApp";
+        private static readonly string repoName = "HubWebApp";
 
         [Test]
         public async Task ShouldCompleteVersion()
@@ -88,17 +87,7 @@ namespace XTI_Git.IntegrationTests
                 (
                     (hostContext, services) =>
                     {
-                        services.AddXtiDataProtection();
-                        services.AddSharedFileSecretCredentials();
-                        services.AddScoped<XtiGitHubRepository>(sp =>
-                        {
-                            //return new WebXtiGitHubRepository("JasonBenfield", "XTI_GitLab");
-                            return new WebXtiGitHubRepository("JasonBenfield", "HubWebApp");
-                        });
-                        services.AddScoped<XtiGitRepository>(sp =>
-                        {
-                            return new GitLibXtiGitRepository(gitRepoPath);
-                        });
+                        services.AddTestServices(hostContext.HostingEnvironment, "JasonBenfield", repoName, gitRepoPath);
                     }
                 )
                 .Build();

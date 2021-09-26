@@ -7,7 +7,6 @@ using XTI_Configuration.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
 using XTI_GitHub.Web;
-using XTI_Secrets.Extensions;
 using XTI_Secrets.Files;
 
 namespace XTI_Git.IntegrationTests
@@ -82,12 +81,7 @@ namespace XTI_Git.IntegrationTests
                 (
                     (hostContext, services) =>
                     {
-                        services.AddXtiDataProtection();
-                        services.AddSharedFileSecretCredentials();
-                        services.AddScoped<XtiGitHubRepository>(sp =>
-                        {
-                            return new WebXtiGitHubRepository("JasonBenfield", "XTI_GitLab");
-                        });
+                        services.AddTestServices(hostContext.HostingEnvironment, "JasonBenfield", "XTI_GitLab", "c:\\xti\\src\\XTI_GitLab");
                     }
                 )
                 .Build();
