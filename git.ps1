@@ -43,7 +43,7 @@ function Git-CompleteIssue {
 
 function Git-Publish {
     param(
-        [ValidateSet("Development", "Production", "Staging", "Test")]
+        [ValidateSet("Development", "Production")]
         $EnvName
     )
     $script:gitConfig | Xti-Publish @PsBoundParameters

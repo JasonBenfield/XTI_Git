@@ -5,11 +5,9 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using XTI_Configuration.Extensions;
-using XTI_Git.GitLib;
 using XTI_GitHub;
 using XTI_GitHub.Web;
 using XTI_Secrets;
-using XTI_Secrets.Extensions;
 
 namespace XTI_Git.IntegrationTests
 {
@@ -79,16 +77,7 @@ namespace XTI_Git.IntegrationTests
                 (
                     (hostContext, services) =>
                     {
-                        services.AddXtiDataProtection();
-                        services.AddFileSecretCredentials();
-                        services.AddScoped<XtiGitHubRepository>(sp =>
-                        {
-                            return new WebXtiGitHubRepository("JasonBenfield", "XTI_GitLab");
-                        });
-                        services.AddScoped<XtiGitRepository>(sp =>
-                        {
-                            return new GitLibXtiGitRepository(gitRepoPath);
-                        });
+                        services.AddTestServices(hostContext.HostingEnvironment, "JasonBenfield", "XTI_GitLab", gitRepoPath);
                     }
                 )
                 .Build();
