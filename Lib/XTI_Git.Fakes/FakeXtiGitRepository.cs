@@ -1,23 +1,22 @@
-﻿namespace XTI_Git.Fakes
+﻿namespace XTI_Git.Fakes;
+
+public sealed class FakeXtiGitRepository : IXtiGitRepository
 {
-    public sealed class FakeXtiGitRepository : XtiGitRepository
+    private string branchName = "";
+
+    public void CheckoutBranch(string branchName) => this.branchName = branchName;
+
+    public void CommitChanges(string message)
     {
-        private string branchName;
+    }
 
-        public void CheckoutBranch(string branchName) => this.branchName = branchName;
+    public string CurrentBranchName() => branchName;
 
-        public void CommitChanges(string message)
-        {
-        }
+    public void DeleteBranch(string branchName)
+    {
+    }
 
-        public string CurrentBranchName() => branchName;
-
-        public void DeleteBranch(string branchName)
-        {
-        }
-
-        public void UseCredentials(string userName, string password)
-        {
-        }
+    public void UseCredentials(string userName, string password)
+    {
     }
 }
