@@ -1,6 +1,3 @@
-﻿using System.IO;
+﻿namespace XTI_GitHub;
 
-namespace XTI_GitHub
-{
-    public sealed record FileUpload(Stream Stream, string FileName, string ContentType);
-}
+public sealed record FileUpload(Stream Stream, string FileName, string ContentType);
