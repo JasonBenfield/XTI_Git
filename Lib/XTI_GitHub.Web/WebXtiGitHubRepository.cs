@@ -212,21 +212,12 @@ public sealed class WebXtiGitHubRepository : XtiGitHubRepository
 
     protected override async Task<GitHubRelease> _Release(string tagName)
     {
-        GitHubRelease gitHubRelease;
-        try
-        {
-            var release = await client.Repository.Release.Get(repoOwner, repoName, tagName);
-            gitHubRelease = createGitHubRelease(release);
-        }
-        catch (NotFoundException)
-        {
-            gitHubRelease = new GitHubRelease(0, "", new GitHubReleaseAsset[0]);
-        }
-        return gitHubRelease;
+        var release = await client.Repository.Release.Get(repoOwner, repoName, tagName);
+        return createGitHubRelease(release);
     }
 
-    protected override Task _DeleteRelease(GitHubRelease gitHubRelease)
-        => client.Repository.Release.Delete(repoOwner, repoName, gitHubRelease.ID);
+    protected override Task _DeleteRelease(GitHubRelease gitHubRelease) =>
+        client.Repository.Release.Delete(repoOwner, repoName, gitHubRelease.ID);
 
     protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
     {
