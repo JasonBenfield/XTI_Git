@@ -234,22 +234,32 @@ public abstract class XtiGitHubRepository
 
     protected abstract Task _CreateMilestone(string name);
 
-    public Task<GitHubRelease> Release(string tagName) => _Release(tagName);
+    public async Task DeleteReleaseIfExists(string tagName)
+    {
+        var release = await _Release(tagName);
+        if(release != null)
+        {
+            foreach (var asset in release.Assets)
+            {
+                await DeleteReleaseAsset(asset);
+            }
+            await DeleteRelease(release);
+        }
+    }
 
-    protected abstract Task<GitHubRelease> _Release(string tagName);
+    protected abstract Task DeleteRelease(GitHubRelease gitHubRelease);
 
-    public Task DeleteRelease(GitHubRelease gitHubRelease) => _DeleteRelease(gitHubRelease);
+    protected abstract Task DeleteReleaseAsset(GitHubReleaseAsset asset);
 
-    protected abstract Task _DeleteRelease(GitHubRelease gitHubRelease);
+    public async Task<GitHubRelease> Release(string tagName) => 
+        (await _Release(tagName)) ?? throw new Exception($"Release not found for tag '{tagName}'");
+
+    protected abstract Task<GitHubRelease?> _Release(string tagName);
 
     public Task<GitHubRelease> CreateRelease(string tagName, string name, string body)
         => _CreateRelease(tagName, name, body);
 
     protected abstract Task<GitHubRelease> _CreateRelease(string tagName, string name, string body);
-
-    public Task DeleteReleaseAsset(GitHubReleaseAsset asset) => _DownloadReleaseAsset(asset);
-
-    protected abstract Task _DeleteReleaseAsset(GitHubReleaseAsset asset);
 
     public Task UploadReleaseAsset(GitHubRelease release, FileUpload asset) => _UploadReleaseAsset(release, asset);
 
