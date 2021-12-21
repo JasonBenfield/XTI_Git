@@ -11,7 +11,7 @@ public sealed class XtiIssueBranchName : XtiBranchName
 
     public static bool CanParse(string text) => regex.IsMatch(text);
 
-    public static XtiIssueBranchName Parse(string text)
+    public static new XtiIssueBranchName Parse(string text)
     {
         var match = regex.Match(text);
         return new XtiIssueBranchName

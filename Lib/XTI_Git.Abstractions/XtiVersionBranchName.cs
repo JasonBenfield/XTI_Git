@@ -9,7 +9,7 @@ public sealed class XtiVersionBranchName : XtiBranchName
 
     public static bool CanParse(string text) => regex.IsMatch(text);
 
-    public static XtiVersionBranchName Parse(string text)
+    public static new XtiVersionBranchName Parse(string text)
     {
         var match = regex.Match(text);
         var version = new XtiGitVersion

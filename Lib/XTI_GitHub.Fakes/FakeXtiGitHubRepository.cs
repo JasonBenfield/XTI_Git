@@ -158,13 +158,12 @@ public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
     private int releaseID = 2233;
     private readonly List<GitHubRelease> releases = new List<GitHubRelease>();
 
-    protected override Task<GitHubRelease> _Release(string tagName)
+    protected override Task<GitHubRelease?> _Release(string tagName)
     {
         var release = releases.FirstOrDefault(r => r.TagName == tagName);
         return Task.FromResult
         (
-            release 
-            ?? new GitHubRelease(0, "", new GitHubReleaseAsset[0])
+            release
         );
     }
 
