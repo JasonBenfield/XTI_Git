@@ -168,7 +168,7 @@ public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         );
     }
 
-    protected override Task _DeleteRelease(GitHubRelease gitHubRelease)
+    protected override Task DeleteRelease(GitHubRelease gitHubRelease)
     {
         releases.RemoveAll(r => r.ID == gitHubRelease.ID);
         return Task.CompletedTask;
@@ -182,7 +182,7 @@ public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.FromResult(release);
     }
 
-    protected override Task _DeleteReleaseAsset(GitHubReleaseAsset asset) => Task.CompletedTask;
+    protected override Task DeleteReleaseAsset(GitHubReleaseAsset asset) => Task.CompletedTask;
 
     protected override Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset)
     {

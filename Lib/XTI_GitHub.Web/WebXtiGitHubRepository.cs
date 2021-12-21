@@ -210,13 +210,22 @@ public sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Issue.Milestone.Update(repoOwner, repoName, milestone.Number, update);
     }
 
-    protected override async Task<GitHubRelease> _Release(string tagName)
+    protected override async Task<GitHubRelease?> _Release(string tagName)
     {
-        var release = await client.Repository.Release.Get(repoOwner, repoName, tagName);
-        return createGitHubRelease(release);
+        GitHubRelease? release;
+        try
+        {
+            var r = await client.Repository.Release.Get(repoOwner, repoName, tagName);
+            release = createGitHubRelease(r);
+        }
+        catch (NotFoundException)
+        {
+            release = null;
+        }
+        return release;
     }
 
-    protected override Task _DeleteRelease(GitHubRelease gitHubRelease) =>
+    protected override Task DeleteRelease(GitHubRelease gitHubRelease) =>
         client.Repository.Release.Delete(repoOwner, repoName, gitHubRelease.ID);
 
     protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
@@ -241,7 +250,7 @@ public sealed class WebXtiGitHubRepository : XtiGitHubRepository
         );
     }
 
-    protected override Task _DeleteReleaseAsset(GitHubReleaseAsset asset)
+    protected override Task DeleteReleaseAsset(GitHubReleaseAsset asset)
         => client.Repository.Release.DeleteAsset(repoOwner, repoName, asset.ID);
 
     protected override async Task _UploadReleaseAsset(GitHubRelease gitHubRelease, FileUpload asset)
