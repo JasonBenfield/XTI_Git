@@ -1,6 +1,6 @@
 ﻿namespace XTI_Git.Fakes;
 
-public sealed class FakeXtiGitRepository : IXtiGitRepository
+internal sealed class FakeXtiGitRepository : IXtiGitRepository
 {
     private string branchName = "";
 

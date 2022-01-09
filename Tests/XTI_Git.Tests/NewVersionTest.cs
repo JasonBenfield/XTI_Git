@@ -3,12 +3,14 @@ using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
-using XTI_GitHub.Fakes;
 
 namespace XTI_Git.Tests;
 
 internal sealed class NewVersionTest
 {
+    private const string RepoOwner = "JasonBenfield";
+    private const string RepoName = "XTI_Test";
+
     [Test]
     public async Task ShouldCreateBranchForNewVersion()
     {
@@ -69,10 +71,7 @@ internal sealed class NewVersionTest
             (
                 (hostContext, services) =>
                 {
-                    services.AddScoped<XtiGitHubRepository>
-                    (
-                        _ => new FakeXtiGitHubRepository("JasonBenfield")
-                    );
+                    services.AddTestServices(RepoOwner, RepoName);
                 }
             )
             .Build();

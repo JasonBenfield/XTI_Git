@@ -1,6 +1,6 @@
 ﻿namespace XTI_GitHub.Fakes;
 
-public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
+internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 {
     private readonly List<string> branches = new List<string>();
 

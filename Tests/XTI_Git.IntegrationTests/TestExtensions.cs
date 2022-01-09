@@ -16,13 +16,11 @@ internal static class TestExtensions
     {
         services.AddFileSecretCredentials(hostEnv);
         services.AddSingleton<XtiFolder>();
-        services.AddScoped<XtiGitHubRepository>(sp =>
-        {
-            return new WebXtiGitHubRepository(repoOwner, repoName, sp.GetRequiredService<IGitHubCredentialsAccessor>());
-        });
+        services.AddScoped<IGitHubCredentialsAccessor, SecretGitHubCredentialsAccessor>();
+        services.AddScoped<IGitHubFactory, WebGitHubFactory>();
+        services.AddScoped(sp => sp.GetRequiredService<IGitHubFactory>().CreateGitHubRepository(repoOwner, repoName));
         services.AddScoped<GitLibCredentials>();
         services.AddScoped<IXtiGitFactory, GitLibFactory>();
         services.AddScoped(sp => sp.GetRequiredService<IXtiGitFactory>().CreateRepository(gitRepoPath));
-        services.AddScoped<IGitHubCredentialsAccessor, SecretGitHubCredentialsAccessor>();
     }
 }

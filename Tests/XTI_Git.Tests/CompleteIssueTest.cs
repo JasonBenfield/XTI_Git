@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
-using System;
-using System.Threading.Tasks;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
-using XTI_GitHub.Fakes;
 
 namespace XTI_Git.Tests;
 
 internal sealed class CompleteIssueTest
 {
     private const string RepoOwner = "JasonBenfield";
+    private const string RepoName = "XTI_Test";
 
     [Test]
     public async Task ShouldRemoveInProgressLabel()
@@ -81,10 +79,7 @@ internal sealed class CompleteIssueTest
             (
                 (hostContext, services) =>
                 {
-                    services.AddScoped<XtiGitHubRepository>
-                    (
-                        _ => new FakeXtiGitHubRepository(RepoOwner)
-                    );
+                    services.AddTestServices(RepoOwner, RepoName);
                 }
             )
             .Build();
