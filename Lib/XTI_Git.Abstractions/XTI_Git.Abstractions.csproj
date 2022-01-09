@@ -4,6 +4,8 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Description>Abstractions for managing local git repositories and GitHub repositories.</Description>
+		<PackageTags>XTI;XTI_Git;Git;GitHub</PackageTags>
 	</PropertyGroup>
 
 	<Import Project="..\\..\\Common.Targets" />

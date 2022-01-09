@@ -1,9 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Description>Fake implementations for managing GitHub repositories.</Description>
+		<PackageTags>XTI;XTI_Git;GitHub</PackageTags>
 	</PropertyGroup>
 
 	<Import Project="..\\..\\Common.Targets"/>
