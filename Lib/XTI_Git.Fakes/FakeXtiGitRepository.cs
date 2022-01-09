@@ -4,19 +4,17 @@ public sealed class FakeXtiGitRepository : IXtiGitRepository
 {
     private string branchName = "";
 
-    public void CheckoutBranch(string branchName) => this.branchName = branchName;
-
-    public void CommitChanges(string message)
+    public Task CheckoutBranch(string branchName)
     {
+        this.branchName = branchName;
+        return Task.CompletedTask;
     }
+
+    public Task CommitChanges(string message) => Task.CompletedTask;
 
     public string CurrentBranchName() => branchName;
 
     public void DeleteBranch(string branchName)
-    {
-    }
-
-    public void UseCredentials(string userName, string password)
     {
     }
 }

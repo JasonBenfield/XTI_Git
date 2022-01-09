@@ -1,17 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	  <TargetFramework>net6.0</TargetFramework>
-	  <Nullable>enable</Nullable>
-	  <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
-  </ItemGroup>
+	<Import Project="..\\..\\Common.Targets"/>
 
-  <ItemGroup>
-    <ProjectReference Include="..\XTI_Git\XTI_Git.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="LibGit2Sharp" Version="0.26.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\XTI_Git.Abstractions\XTI_Git.Abstractions.csproj" />
+		<ProjectReference Include="..\XTI_Git\XTI_Git.csproj" />
+	</ItemGroup>
 
 </Project>
