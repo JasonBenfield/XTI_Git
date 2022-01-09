@@ -10,6 +10,7 @@ namespace XTI_Git.Tests;
 internal sealed class NewIssueTest
 {
     private const string RepoOwner = "JasonBenfield";
+    private const string RepoName = "XTI_Test";
 
     [Test]
     public async Task ShouldCreateNewIssue()
@@ -89,10 +90,7 @@ internal sealed class NewIssueTest
             (
                 (hostContext, services) =>
                 {
-                    services.AddScoped<XtiGitHubRepository>
-                    (
-                        _ => new FakeXtiGitHubRepository(RepoOwner)
-                    );
+                    services.AddTestServices(RepoOwner, RepoName);
                 }
             )
             .Build();

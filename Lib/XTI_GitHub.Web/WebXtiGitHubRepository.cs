@@ -3,13 +3,13 @@ using XTI_Git.Abstractions;
 
 namespace XTI_GitHub.Web;
 
-public sealed class WebXtiGitHubRepository : XtiGitHubRepository
+internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
 {
     private readonly string repoName;
     private readonly IGitHubCredentialsAccessor credentialsAccessor;
     private GitHubClient? cachedClient;
 
-    public WebXtiGitHubRepository(string repoOwner, string repoName, IGitHubCredentialsAccessor credentialsAccessor)
+    internal WebXtiGitHubRepository(string repoOwner, string repoName, IGitHubCredentialsAccessor credentialsAccessor)
         : base(repoOwner)
     {
         this.repoName = repoName;

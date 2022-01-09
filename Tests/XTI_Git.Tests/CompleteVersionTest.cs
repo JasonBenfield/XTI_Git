@@ -10,6 +10,7 @@ namespace XTI_Git.Tests;
 internal sealed class CompleteVersionTest
 {
     private const string RepoOwner = "JasonBenfield";
+    private const string RepoName = "XTI_Test";
 
     [Test]
     public async Task ShouldCreatePullRequest()
@@ -99,10 +100,7 @@ internal sealed class CompleteVersionTest
             (
                 (hostContext, services) =>
                 {
-                    services.AddScoped<XtiGitHubRepository>
-                    (
-                        _ => new FakeXtiGitHubRepository(RepoOwner)
-                    );
+                    services.AddTestServices(RepoOwner, RepoName);
                 }
             )
             .Build();
