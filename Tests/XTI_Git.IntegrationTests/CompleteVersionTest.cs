@@ -41,8 +41,8 @@ public sealed class CompleteVersionTest
         }
         await gitRepo.CommitChanges($"Complete version test: {changedLine}");
         await repo.CompleteVersion(newVersion.BranchName());
-        var defaultBranchName = await repo.DefaultBranchName();
-        await gitRepo.CheckoutBranch(defaultBranchName);
+        var repoInfo = await repo.RepositoryInformation();
+        await gitRepo.CheckoutBranch(repoInfo.DefaultBranch);
         gitRepo.DeleteBranch(newVersion.BranchName().Value);
     }
 

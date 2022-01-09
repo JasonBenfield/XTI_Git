@@ -11,13 +11,9 @@ public abstract class XtiGitHubRepository
         this.repoOwner = repoOwner;
     }
 
-    public Task<string> DefaultBranchName() => _DefaultBranchName();
+    public Task<GitHubRepo> RepositoryInformation() => _RepositoryInformation();
 
-    protected abstract Task<string> _DefaultBranchName();
-
-    public Task<GitHubRepo> CreateRepositoryIfNotExists(string name) => _CreateRepositoryIfNotExists(name);
-
-    protected abstract Task<GitHubRepo> _CreateRepositoryIfNotExists(string name);
+    protected abstract Task<GitHubRepo> _RepositoryInformation();
 
     public async Task CreateNewVersion(XtiGitVersion newVersion)
     {
@@ -153,7 +149,7 @@ public abstract class XtiGitHubRepository
                 }
             );
         }
-        var defaultBranchName = await DefaultBranchName();
+        var repositoryInfo = await RepositoryInformation();
         var branches = await _Branches();
         if (branches.Any(b => b.Equals(versionBranchName.Value, StringComparison.OrdinalIgnoreCase)))
         {
@@ -162,7 +158,7 @@ public abstract class XtiGitHubRepository
                 $"Pull Request for {versionBranchName.Version.Key}",
                 "",
                 versionBranchName.Value,
-                defaultBranchName
+                repositoryInfo.DefaultBranch
             );
             await _MergePullRequest(pullRequest);
         }

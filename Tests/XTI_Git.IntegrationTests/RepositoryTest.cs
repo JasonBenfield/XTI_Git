@@ -15,14 +15,14 @@ internal sealed class RepositoryTest
     public async Task ShouldCreateRepository()
     {
         var services = setup();
-        var repo = getGitHubRepo(services);
-        await repo.CreateRepositoryIfNotExists("TestLib");
-        var gitHubRepo = await repo.CreateRepositoryIfNotExists("TestLib");
-        Console.WriteLine(JsonSerializer.Serialize(gitHubRepo, new JsonSerializerOptions { WriteIndented = true }));
+        var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
+        var gitHubRepo = await gitHubFactory.CreateNewGitHubRepositoryIfNotExists("JasonBenfield", "TestLib");
+        var gitHubInfo = await gitHubRepo.RepositoryInformation();
+        Console.WriteLine(JsonSerializer.Serialize(gitHubInfo, new JsonSerializerOptions { WriteIndented = true }));
         var testLibDir = Path.Combine(gitRepoPath);
         if (Directory.Exists(testLibDir)) { Directory.Delete(testLibDir, true); }
         var gitFactory = services.GetRequiredService<IXtiGitFactory>();
-        await gitFactory.CloneRepository(gitHubRepo.Url, gitRepoPath);
+        await gitFactory.CloneRepository(gitHubInfo.CloneUrl, gitRepoPath);
     }
 
     private IServiceProvider setup()

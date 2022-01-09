@@ -27,32 +27,11 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return cachedClient;
     }
 
-    protected override async Task<string> _DefaultBranchName()
+    protected override async Task<GitHubRepo> _RepositoryInformation()
     {
         var client = await fetchClient();
         var repo = await client.Repository.Get(repoOwner, repoName);
-        return repo.DefaultBranch;
-    }
-
-    protected override async Task<GitHubRepo> _CreateRepositoryIfNotExists(string name)
-    {
-        var client = await fetchClient();
-        Repository repo;
-        try
-        {
-            repo = await client.Repository.Get(repoOwner, name);
-        }
-        catch (NotFoundException)
-        {
-            repo = await client.Repository.Create
-            (
-                new NewRepository(name)
-                {
-                    GitignoreTemplate = "VisualStudio"
-                }
-            );
-        }
-        return new GitHubRepo(repo.Name, repo.CloneUrl);
+        return new GitHubRepo(repo.Name, repo.CloneUrl, repo.DefaultBranch);
     }
 
     protected override async Task<string[]> _Branches()
