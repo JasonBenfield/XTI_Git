@@ -2,6 +2,9 @@
 
 public sealed class FakeGitHubFactory : IGitHubFactory
 {
+    public Task<XtiGitHubRepository> CreateNewGitHubRepositoryIfNotExists(string owner, string name) =>
+        Task.FromResult(CreateGitHubRepository(owner, name));
+
     public XtiGitHubRepository CreateGitHubRepository(string owner, string name) =>
-        new FakeXtiGitHubRepository(owner);
+        new FakeXtiGitHubRepository(owner, name);
 }

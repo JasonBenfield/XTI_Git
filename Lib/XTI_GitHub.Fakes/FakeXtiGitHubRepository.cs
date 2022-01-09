@@ -2,17 +2,17 @@
 
 internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 {
+    private readonly string repoName;
     private readonly List<string> branches = new List<string>();
 
-    public FakeXtiGitHubRepository(string repoOwner)
+    public FakeXtiGitHubRepository(string repoOwner, string repoName)
         : base(repoOwner)
     {
+        this.repoName = repoName;
     }
 
-    protected override Task<string> _DefaultBranchName() => Task.FromResult("main");
-
-    protected override Task<GitHubRepo> _CreateRepositoryIfNotExists(string name) =>
-        Task.FromResult(new GitHubRepo(name, ""));
+    protected override Task<GitHubRepo> _RepositoryInformation() => 
+        Task.FromResult(new GitHubRepo(repoName, $"https://example.com/{repoOwner}/{repoName}.git", "main"));
 
     protected override Task<string[]> _Branches() => Task.FromResult(branches.ToArray());
 
