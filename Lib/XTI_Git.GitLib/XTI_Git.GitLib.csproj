@@ -4,6 +4,8 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Description>LibGit2Sharp implementations for managing local git repositories.</Description>
+		<PackageTags>XTI;XTI_Git;Git</PackageTags>
 	</PropertyGroup>
 
 	<Import Project="..\\..\\Common.Targets"/>

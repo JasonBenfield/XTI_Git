@@ -1,9 +1,4 @@
 ﻿using Octokit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XTI_Git.Abstractions;
 
 namespace XTI_GitHub.Web;
@@ -28,13 +23,7 @@ public sealed class WebGitHubFactory : IGitHubFactory
         }
         catch (NotFoundException)
         {
-            await client.Repository.Create
-            (
-                new NewRepository(name)
-                {
-                    GitignoreTemplate = "VisualStudio"
-                }
-            );
+            await client.Repository.Create(new NewRepository(name));
         }
         return CreateGitHubRepository(owner, name);
     }
