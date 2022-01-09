@@ -1,32 +1,31 @@
 ﻿using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
+using XTI_Git.Abstractions;
 
 namespace XTI_Git.GitLib;
 
 public sealed class GitLibXtiGitRepository : IXtiGitRepository
 {
-    private readonly Repository repo;
-    private string userName = "";
-    private string password = "";
+    private readonly string path;
+    private readonly GitLibCredentials gitLibCredentials;
+    private Repository? cachedRepo;
 
-    public GitLibXtiGitRepository(string path)
+    public GitLibXtiGitRepository(string path, GitLibCredentials gitLibCredentials)
     {
-        repo = new Repository(path);
+        this.path = path;
+        this.gitLibCredentials = gitLibCredentials;
     }
 
-    public void UseCredentials(string userName, string password)
-    {
-        this.userName = userName;
-        this.password = password;
-    }
+    private Repository fetchRepo() => cachedRepo ??= new Repository(path);
 
-    public string CurrentBranchName() => repo.Head.FriendlyName;
+    public string CurrentBranchName() => fetchRepo().Head.FriendlyName;
 
-    public void CheckoutBranch(string branchName)
+    public async Task CheckoutBranch(string branchName)
     {
         if (CurrentBranchName() != branchName)
         {
-            pull();
+            var repo = fetchRepo();
+            await pull(repo);
             var branch = repo.Branches.FirstOrDefault(b => b.FriendlyName == branchName);
             if (branch == null)
             {
@@ -39,12 +38,13 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
                 );
             }
             Commands.Checkout(repo, branch);
-            pull();
+            await pull(repo);
         }
     }
 
     public void DeleteBranch(string branchName)
     {
+        var repo = fetchRepo();
         var branch = repo.Branches.FirstOrDefault(b => b.FriendlyName == branchName);
         if (branch != null)
         {
@@ -52,59 +52,40 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
         }
     }
 
-    private void pull()
+    private async Task pull(Repository repo)
     {
+        var credentialsHandler = await gitLibCredentials.CredentialsHandler();
         var remoteRefs = repo.Network.ListReferences
         (
-            repo.Network.Remotes["origin"], getCredentials()
+            repo.Network.Remotes["origin"],
+            credentialsHandler
         );
         if (remoteRefs.Any(r => r.CanonicalName.Equals($"refs/heads/{repo.Head.FriendlyName}", StringComparison.OrdinalIgnoreCase)))
         {
-            var signature = getSignature();
+            var signature = await gitLibCredentials.Signature();
             var options = new PullOptions
             {
                 FetchOptions = new FetchOptions
                 {
-                    CredentialsProvider = getCredentials()
+                    CredentialsProvider = credentialsHandler
                 }
             };
             Commands.Pull(repo, signature, options);
         }
     }
 
-    public void CommitChanges(string message)
+    public async Task CommitChanges(string message)
     {
+        var repo = fetchRepo();
         Commands.Stage(repo, "*");
         var diff = repo.Diff.Compare<TreeChanges>(repo.Head.Tip.Tree, DiffTargets.Index);
         if (diff.Any())
         {
-            var signature = getSignature();
+            var signature = await gitLibCredentials.Signature();
             repo.Commit(message, signature, signature);
             var options = new PushOptions();
-            options.CredentialsProvider = getCredentials();
+            options.CredentialsProvider = await gitLibCredentials.CredentialsHandler();
             repo.Network.Push(repo.Head, options);
         }
-    }
-
-    private CredentialsHandler getCredentials()
-    {
-        return new CredentialsHandler
-        (
-            (url, usernameFromUrl, types) =>
-                new UsernamePasswordCredentials()
-                {
-                    Username = userName,
-                    Password = password
-                }
-        );
-    }
-
-    private Signature getSignature()
-    {
-        return new Signature
-        (
-            new Identity(userName, userName),
-            DateTimeOffset.Now
-        );
     }
 }

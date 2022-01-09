@@ -3,8 +3,6 @@ using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using XTI_Configuration.Extensions;
 using XTI_GitHub;
-using XTI_GitHub.Web;
-using XTI_Secrets;
 
 namespace XTI_Git.IntegrationTests;
 
@@ -15,7 +13,7 @@ internal sealed class ReleaseTest
     [Test]
     public async Task ShouldDownloadReleaseAsset()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var release = await repo.Release("v1.0-alpha");
         var asset = await repo.DownloadReleaseAsset(release.Assets[0]);
@@ -30,7 +28,7 @@ internal sealed class ReleaseTest
     [Test]
     public async Task ShouldUploadRelease()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, "hub.zip");
         using var stream = new MemoryStream(File.ReadAllBytes(path));
@@ -47,20 +45,7 @@ internal sealed class ReleaseTest
         );
     }
 
-    private async Task<IServiceProvider> setup()
-    {
-        var sp = configureServices();
-        var gitHubRepo = (WebXtiGitHubRepository)sp.GetRequiredService<XtiGitHubRepository>();
-        var credentialsFactory = sp.GetRequiredService<ISecretCredentialsFactory>();
-        var credentials = credentialsFactory.Create("GitHub");
-        var credentialsValue = await credentials.Value();
-        gitHubRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        var gitRepo = sp.GetRequiredService<IXtiGitRepository>();
-        gitRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        return sp;
-    }
-
-    private IServiceProvider configureServices()
+    private IServiceProvider setup()
     {
         var host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration

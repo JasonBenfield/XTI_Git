@@ -15,6 +15,10 @@ public abstract class XtiGitHubRepository
 
     protected abstract Task<string> _DefaultBranchName();
 
+    public Task<GitHubRepo> CreateRepositoryIfNotExists(string name) => _CreateRepositoryIfNotExists(name);
+
+    protected abstract Task<GitHubRepo> _CreateRepositoryIfNotExists(string name);
+
     public async Task CreateNewVersion(XtiGitVersion newVersion)
     {
         var branchName = newVersion.BranchName().Value;

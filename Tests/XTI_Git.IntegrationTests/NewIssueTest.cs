@@ -4,8 +4,6 @@ using NUnit.Framework;
 using XTI_Configuration.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
-using XTI_GitHub.Web;
-using XTI_Secrets.Files;
 
 namespace XTI_Git.IntegrationTests;
 
@@ -14,7 +12,7 @@ internal sealed class NewIssueTest
     [Test]
     public async Task ShouldCreateNewIssue()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
         await repo.CreateNewVersion(newVersion);
@@ -28,7 +26,7 @@ internal sealed class NewIssueTest
     [Test]
     public async Task ShouldNotCreateDuplicateOpenIssue()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
         await repo.CreateNewVersion(newVersion);
@@ -42,7 +40,7 @@ internal sealed class NewIssueTest
     [Test]
     public async Task ShouldStartIssue()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
         await repo.CreateNewVersion(newVersion);
@@ -54,18 +52,7 @@ internal sealed class NewIssueTest
         Assert.That(issues[0].Labels, Has.One.EqualTo("in progress"), "Should add in progress label when starting issue");
     }
 
-    private async Task<IServiceProvider> setup()
-    {
-        var sp = configureServices();
-        var gitHubRepo = (WebXtiGitHubRepository)sp.GetRequiredService<XtiGitHubRepository>();
-        var credentialsFactory = sp.GetRequiredService<SharedFileSecretCredentialsFactory>();
-        var credentials = credentialsFactory.Create("GitHub");
-        var credentialsValue = await credentials.Value();
-        gitHubRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        return sp;
-    }
-
-    private IServiceProvider configureServices()
+    private IServiceProvider setup()
     {
         var host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration

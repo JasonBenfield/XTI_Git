@@ -11,6 +11,9 @@ public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     protected override Task<string> _DefaultBranchName() => Task.FromResult("main");
 
+    protected override Task<GitHubRepo> _CreateRepositoryIfNotExists(string name) =>
+        Task.FromResult(new GitHubRepo(name, ""));
+
     protected override Task<string[]> _Branches() => Task.FromResult(branches.ToArray());
 
     protected override Task _CreateBranch(string name)
@@ -95,7 +98,7 @@ public sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         var issue = issues.FirstOrDefault(iss => iss.Number == number);
         return Task.FromResult
         (
-            issue 
+            issue
             ?? new GitHubIssue(0, "", new GitHubMilestone(0, ""), "Open", new string[0], new string[0])
         );
     }

@@ -4,8 +4,6 @@ using NUnit.Framework;
 using XTI_Configuration.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
-using XTI_GitHub.Web;
-using XTI_Secrets;
 
 namespace XTI_Git.IntegrationTests;
 
@@ -17,60 +15,47 @@ public sealed class CompleteVersionTest
     [Test]
     public async Task ShouldCompleteVersion()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Minor", "V1169");
         await repo.CreateNewVersion(newVersion);
         var gitRepo = getGitRepo(services);
-        gitRepo.CheckoutBranch(newVersion.BranchName().Value);
+        await gitRepo.CheckoutBranch(newVersion.BranchName().Value);
         const string issueTitle = "Test Complete Version";
         var issue = await repo.CreateIssue(newVersion, issueTitle);
         await repo.StartIssue(newVersion, issue.Number);
-        gitRepo.CheckoutBranch(issue.BranchName().Value);
+        await gitRepo.CheckoutBranch(issue.BranchName().Value);
         var changedLine = Guid.NewGuid().ToString("N");
         using (var writer = new StreamWriter(Path.Combine(gitRepoPath, "test_V6_issue.txt"), true))
         {
             await writer.WriteLineAsync(changedLine);
         }
-        gitRepo.CommitChanges($"Complete version test issue: {changedLine}");
+        await gitRepo.CommitChanges($"Complete version test issue: {changedLine}");
         await repo.CompleteIssue(issue.BranchName());
-        gitRepo.CheckoutBranch(newVersion.BranchName().Value);
+        await gitRepo.CheckoutBranch(newVersion.BranchName().Value);
         gitRepo.DeleteBranch(issue.BranchName().Value);
         changedLine = Guid.NewGuid().ToString("N");
         using (var writer = new StreamWriter(Path.Combine(gitRepoPath, "test_V6_version.txt"), true))
         {
             await writer.WriteLineAsync(changedLine);
         }
-        gitRepo.CommitChanges($"Complete version test: {changedLine}");
+        await gitRepo.CommitChanges($"Complete version test: {changedLine}");
         await repo.CompleteVersion(newVersion.BranchName());
         var defaultBranchName = await repo.DefaultBranchName();
-        gitRepo.CheckoutBranch(defaultBranchName);
+        await gitRepo.CheckoutBranch(defaultBranchName);
         gitRepo.DeleteBranch(newVersion.BranchName().Value);
     }
 
     [Test]
     public async Task ShouldCompleteHubVersion()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Minor", "V1169");
         await repo.CompleteVersion(newVersion.BranchName());
     }
 
-    private async Task<IServiceProvider> setup()
-    {
-        var sp = configureServices();
-        var gitHubRepo = (WebXtiGitHubRepository)sp.GetRequiredService<XtiGitHubRepository>();
-        var credentialsFactory = sp.GetRequiredService<ISharedSecretCredentialsFactory>();
-        var credentials = credentialsFactory.Create("GitHub");
-        var credentialsValue = await credentials.Value();
-        gitHubRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        var gitRepo = sp.GetRequiredService<IXtiGitRepository>();
-        gitRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        return sp;
-    }
-
-    private IServiceProvider configureServices()
+    private IServiceProvider setup()
     {
         var host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration
