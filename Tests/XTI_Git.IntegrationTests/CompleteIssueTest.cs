@@ -4,8 +4,6 @@ using NUnit.Framework;
 using XTI_Configuration.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
-using XTI_GitHub.Web;
-using XTI_Secrets.Files;
 
 namespace XTI_Git.IntegrationTests;
 
@@ -16,42 +14,29 @@ public sealed class CompleteIssueTest
     [Test]
     public async Task ShouldCompleteIssue()
     {
-        var services = await setup();
+        var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
         await repo.CreateNewVersion(newVersion);
         var gitRepo = getGitRepo(services);
-        gitRepo.CheckoutBranch(newVersion.BranchName().Value);
+        await gitRepo.CheckoutBranch(newVersion.BranchName().Value);
         const string issueTitle = "Test Issue";
         var issue = await repo.CreateIssue(newVersion, issueTitle);
         await repo.StartIssue(newVersion, issue.Number);
-        gitRepo.CheckoutBranch(issue.BranchName().Value);
+        await gitRepo.CheckoutBranch(issue.BranchName().Value);
 
         var changedLine = Guid.NewGuid().ToString("N");
         using (var writer = new StreamWriter(Path.Combine(gitRepoPath, "test.txt"), true))
         {
             await writer.WriteLineAsync(changedLine);
         }
-        gitRepo.CommitChanges($"Complete issue test {changedLine}");
+        await gitRepo.CommitChanges($"Complete issue test {changedLine}");
 
         await repo.CompleteIssue(issue.BranchName());
         var pullRequests = await repo.PullRequests();
     }
 
-    private async Task<IServiceProvider> setup()
-    {
-        var sp = configureServices();
-        var gitHubRepo = (WebXtiGitHubRepository)sp.GetRequiredService<XtiGitHubRepository>();
-        var credentialsFactory = sp.GetRequiredService<SharedFileSecretCredentialsFactory>();
-        var credentials = credentialsFactory.Create("GitHub");
-        var credentialsValue = await credentials.Value();
-        gitHubRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        var gitRepo = sp.GetRequiredService<IXtiGitRepository>();
-        gitRepo.UseCredentials(credentialsValue.UserName, credentialsValue.Password);
-        return sp;
-    }
-
-    private IServiceProvider configureServices()
+    private IServiceProvider setup()
     {
         var host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration

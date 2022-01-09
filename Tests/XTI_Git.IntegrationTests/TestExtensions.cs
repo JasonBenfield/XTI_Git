@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using XTI_Core;
+using XTI_Git.Abstractions;
 using XTI_Git.GitLib;
+using XTI_Git.Secrets;
 using XTI_GitHub;
 using XTI_GitHub.Web;
 using XTI_Secrets.Extensions;
@@ -16,11 +18,11 @@ internal static class TestExtensions
         services.AddSingleton<XtiFolder>();
         services.AddScoped<XtiGitHubRepository>(sp =>
         {
-            return new WebXtiGitHubRepository(repoOwner, repoName);
+            return new WebXtiGitHubRepository(repoOwner, repoName, sp.GetRequiredService<IGitHubCredentialsAccessor>());
         });
-        services.AddScoped<IXtiGitRepository>(sp =>
-        {
-            return new GitLibXtiGitRepository(gitRepoPath);
-        });
+        services.AddScoped<GitLibCredentials>();
+        services.AddScoped<IXtiGitFactory, GitLibFactory>();
+        services.AddScoped(sp => sp.GetRequiredService<IXtiGitFactory>().CreateRepository(gitRepoPath));
+        services.AddScoped<IGitHubCredentialsAccessor, SecretGitHubCredentialsAccessor>();
     }
 }
