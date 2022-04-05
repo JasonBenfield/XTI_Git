@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
+using XTI_Core.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
 using XTI_GitHub.Fakes;
@@ -85,17 +86,9 @@ internal sealed class NewIssueTest
 
     private IServiceProvider setup()
     {
-        var host = Host.CreateDefaultBuilder()
-            .ConfigureServices
-            (
-                (hostContext, services) =>
-                {
-                    services.AddTestServices(RepoOwner, RepoName);
-                }
-            )
-            .Build();
-        var scope = host.Services.CreateScope();
-        return scope.ServiceProvider;
+        var hostBuilder = new XtiHostBuilder();
+        hostBuilder.Services.AddTestServices(RepoOwner, RepoName);
+        return hostBuilder.Build().Scope();
     }
 
     private static XtiGitHubRepository getRepo(IServiceProvider services)

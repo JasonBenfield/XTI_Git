@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
-using XTI_Configuration.Extensions;
+using XTI_Core.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
 
@@ -10,7 +9,6 @@ namespace XTI_Git.IntegrationTests;
 public sealed class CompleteVersionTest
 {
     private static readonly string gitRepoPath = "C:\\XTI\\src\\HubWebApp";
-    private static readonly string repoName = "HubWebApp";
 
     [Test]
     public async Task ShouldCompleteVersion()
@@ -57,24 +55,9 @@ public sealed class CompleteVersionTest
 
     private IServiceProvider setup()
     {
-        var host = Host.CreateDefaultBuilder()
-            .ConfigureAppConfiguration
-            (
-                (hostContext, config) =>
-                {
-                    config.UseXtiConfiguration(hostContext.HostingEnvironment, new string[] { });
-                }
-            )
-            .ConfigureServices
-            (
-                (hostContext, services) =>
-                {
-                    services.AddTestServices(hostContext.HostingEnvironment, "JasonBenfield", repoName, gitRepoPath);
-                }
-            )
-            .Build();
-        var scope = host.Services.CreateScope();
-        return scope.ServiceProvider;
+        var hostBuilder = new XtiHostBuilder();
+        hostBuilder.Services.AddTestServices("JasonBenfield", "XTI_GitLab", gitRepoPath);
+        return hostBuilder.Build().Scope();
     }
 
     private static XtiGitHubRepository getGitHubRepo(IServiceProvider services)

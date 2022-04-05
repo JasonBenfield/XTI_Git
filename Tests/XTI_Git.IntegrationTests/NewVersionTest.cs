@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
-using XTI_Configuration.Extensions;
+using XTI_Core.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
 
@@ -97,24 +96,9 @@ internal sealed class NewVersionTest
 
     private IServiceProvider setup()
     {
-        var host = Host.CreateDefaultBuilder()
-            .ConfigureAppConfiguration
-            (
-                (hostContext, config) =>
-                {
-                    config.UseXtiConfiguration(hostContext.HostingEnvironment, new string[] { });
-                }
-            )
-            .ConfigureServices
-            (
-                (hostContext, services) =>
-                {
-                    services.AddTestServices(hostContext.HostingEnvironment, "JasonBenfield", repoName, gitRepoPath);
-                }
-            )
-            .Build();
-        var scope = host.Services.CreateScope();
-        return scope.ServiceProvider;
+        var hostBuilder = new XtiHostBuilder();
+        hostBuilder.Services.AddTestServices("JasonBenfield", repoName, gitRepoPath);
+        return hostBuilder.Build().Scope();
     }
 
     private static XtiGitHubRepository getGitHubRepo(IServiceProvider services)
