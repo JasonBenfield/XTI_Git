@@ -8,8 +8,6 @@
 		<PackageTags>XTI;XTI_Git;GitHub</PackageTags>
 	</PropertyGroup>
 
-	<Import Project="..\\..\\Common.Targets"/>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
 		<PackageReference Include="Octokit" Version="0.50.0" />

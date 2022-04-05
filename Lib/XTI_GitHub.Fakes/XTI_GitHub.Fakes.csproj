@@ -8,8 +8,6 @@
 		<PackageTags>XTI;XTI_Git;GitHub</PackageTags>
 	</PropertyGroup>
 
-	<Import Project="..\\..\\Common.Targets"/>
-
 	<ItemGroup>
 		<ProjectReference Include="..\XTI_GitHub\XTI_GitHub.csproj" />
 	</ItemGroup>

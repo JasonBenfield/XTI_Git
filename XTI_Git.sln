@@ -26,13 +26,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{509D826A-D389-461F-AB8C-7B8A2F332967}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		Common.Targets = Common.Targets
 		xti.ps1 = xti.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git.Fakes", "Lib\XTI_Git.Fakes\XTI_Git.Fakes.csproj", "{CE925B7B-F7D4-42E1-9337-279FA756614A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XTI_Git.Secrets", "Lib\XTI_Git.Secrets\XTI_Git.Secrets.csproj", "{F672A6B3-05C9-448A-A01F-1C0B8C5A806D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XTI_Git.Secrets", "Lib\XTI_Git.Secrets\XTI_Git.Secrets.csproj", "{F672A6B3-05C9-448A-A01F-1C0B8C5A806D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

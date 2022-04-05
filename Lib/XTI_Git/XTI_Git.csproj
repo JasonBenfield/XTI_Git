@@ -8,5 +8,4 @@
 		<PackageTags>XTI;XTI_Git;Git</PackageTags>
 	</PropertyGroup>
 
-	<Import Project="..\\..\\Common.Targets"/>
 </Project>
