@@ -12,9 +12,9 @@ namespace XTI_Git.IntegrationTests;
 
 internal static class TestExtensions
 {
-    public static void AddTestServices(this IServiceCollection services, IHostEnvironment hostEnv, string repoOwner, string repoName, string gitRepoPath)
+    public static void AddTestServices(this IServiceCollection services, string repoOwner, string repoName, string gitRepoPath)
     {
-        services.AddFileSecretCredentials(hostEnv);
+        services.AddFileSecretCredentials();
         services.AddSingleton<XtiFolder>();
         services.AddScoped<IGitHubCredentialsAccessor, SecretGitHubCredentialsAccessor>();
         services.AddScoped<IGitHubFactory, WebGitHubFactory>();

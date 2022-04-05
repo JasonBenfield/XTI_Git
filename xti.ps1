@@ -3,8 +3,6 @@ Import-Module PowershellForXti -Force
 $script:xtiConfig = [PSCustomObject]@{
     RepoOwner = "JasonBenfield"
     RepoName = "XTI_Git"
-    AppName = "XTI_Git"
-    AppType = "Package"
 }
 
 function Xti-NewVersion {
@@ -40,7 +38,9 @@ function Xti-CompleteIssue {
 function Xti-Publish {
     param(
         [ValidateSet("Development", "Production")]
-        $EnvName
+        $EnvName,
+        [ValidateSet("Default", "DB")]
+        $HubAdministrationType = "Default"
     )
     $script:xtiConfig | BaseXti-Publish @PsBoundParameters
 }

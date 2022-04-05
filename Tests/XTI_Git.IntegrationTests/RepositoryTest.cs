@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using System.Text.Json;
-using XTI_Configuration.Extensions;
+using XTI_Core.Extensions;
 using XTI_GitHub;
 
 namespace XTI_Git.IntegrationTests;
@@ -27,28 +26,8 @@ internal sealed class RepositoryTest
 
     private IServiceProvider setup()
     {
-        var host = Host.CreateDefaultBuilder()
-            .ConfigureAppConfiguration
-            (
-                (hostContext, config) =>
-                {
-                    config.UseXtiConfiguration(hostContext.HostingEnvironment, new string[] { });
-                }
-            )
-            .ConfigureServices
-            (
-                (hostContext, services) =>
-                {
-                    services.AddTestServices(hostContext.HostingEnvironment, "JasonBenfield", "XTI_GitLab", gitRepoPath);
-                }
-            )
-            .Build();
-        var scope = host.Services.CreateScope();
-        return scope.ServiceProvider;
-    }
-
-    private static XtiGitHubRepository getGitHubRepo(IServiceProvider services)
-    {
-        return services.GetRequiredService<XtiGitHubRepository>();
+        var hostBuilder = new XtiHostBuilder();
+        hostBuilder.Services.AddTestServices("JasonBenfield", "XTI_GitLab", gitRepoPath);
+        return hostBuilder.Build().Scope();
     }
 }
