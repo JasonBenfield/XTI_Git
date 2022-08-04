@@ -237,6 +237,22 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Issue.Milestone.Update(repoOwner, repoName, milestone.Number, update);
     }
 
+    protected override async Task<GitHubRelease?> _LatestRelease()
+    {
+        var client = await fetchClient();
+        GitHubRelease? release;
+        try
+        {
+            var r = await client.Repository.Release.GetLatest(repoOwner, repoName);
+            release = createGitHubRelease(r);
+        }
+        catch (NotFoundException)
+        {
+            release = null;
+        }
+        return release;
+    }
+
     protected override async Task<GitHubRelease?> _Release(string tagName)
     {
         var client = await fetchClient();
