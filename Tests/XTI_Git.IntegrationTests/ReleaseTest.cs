@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using System.Text.Json;
+using XTI_Core;
 using XTI_Core.Extensions;
 using XTI_GitHub;
 
@@ -8,6 +10,15 @@ namespace XTI_Git.IntegrationTests;
 internal sealed class ReleaseTest
 {
     private static readonly string gitRepoPath = "C:\\XTI\\src\\XTI_GitLab";
+
+    [Test]
+    public async Task ShouldGetLatestRelease()
+    {
+        var services = setup();
+        var repo = getGitHubRepo(services);
+        var release = await repo.LatestRelease();
+        Console.WriteLine(XtiSerializer.Serialize(release, new JsonSerializerOptions { WriteIndented = true }));
+    }
 
     [Test]
     public async Task ShouldDownloadReleaseAsset()

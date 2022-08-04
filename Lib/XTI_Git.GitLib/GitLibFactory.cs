@@ -18,9 +18,10 @@ public sealed class GitLibFactory : IXtiGitFactory
         (
             repoUrl,
             path,
-            new CloneOptions()
+            new CloneOptions
             {
-                CredentialsProvider = credentialsHandler
+                CredentialsProvider = credentialsHandler,
+                BranchName = "main"
             }
         );
         return CreateRepository(path);

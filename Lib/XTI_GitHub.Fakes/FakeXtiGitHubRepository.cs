@@ -3,7 +3,7 @@
 internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 {
     private readonly string repoName;
-    private readonly List<string> branches = new List<string>();
+    private readonly List<string> branches = new();
 
     public FakeXtiGitHubRepository(string repoOwner, string repoName)
         : base(repoOwner)
@@ -11,7 +11,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         this.repoName = repoName;
     }
 
-    protected override Task<GitHubRepo> _RepositoryInformation() => 
+    protected override Task<GitHubRepo> _RepositoryInformation() =>
         Task.FromResult(new GitHubRepo(repoName, $"https://example.com/{repoOwner}/{repoName}.git", "main"));
 
     protected override Task<string[]> _Branches() => Task.FromResult(branches.ToArray());
@@ -22,7 +22,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.CompletedTask;
     }
 
-    private readonly List<GitHubMilestone> milestones = new List<GitHubMilestone>();
+    private readonly List<GitHubMilestone> milestones = new();
 
     private int milestoneNumber = 321;
 
@@ -42,7 +42,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
     protected override Task<GitHubMilestone[]> _Milestones()
         => Task.FromResult(milestones.ToArray());
 
-    private readonly List<GitHubIssue> issues = new List<GitHubIssue>();
+    private readonly List<GitHubIssue> issues = new();
 
     private int issueNumber = 234;
 
@@ -71,8 +71,8 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
             issueTitle,
             milestone,
             "Open",
-            new string[] { },
-            new string[] { }
+            new string[0],
+            new string[0]
         );
         issues.Add(gitHubIssue);
         issueNumber++;
@@ -159,15 +159,18 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
     }
 
     private int releaseID = 2233;
-    private readonly List<GitHubRelease> releases = new List<GitHubRelease>();
+    private readonly List<GitHubRelease> releases = new();
+
+    protected override Task<GitHubRelease?> _LatestRelease()
+    {
+        var release = releases.LastOrDefault();
+        return Task.FromResult(release);
+    }
 
     protected override Task<GitHubRelease?> _Release(string tagName)
     {
         var release = releases.FirstOrDefault(r => r.TagName == tagName);
-        return Task.FromResult
-        (
-            release
-        );
+        return Task.FromResult(release);
     }
 
     protected override Task DeleteRelease(GitHubRelease gitHubRelease)
@@ -178,7 +181,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     protected override Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
     {
-        var release = new GitHubRelease(releaseID, tagName, new GitHubReleaseAsset[] { });
+        var release = new GitHubRelease(releaseID, tagName, new GitHubReleaseAsset[0]);
         releaseID++;
         releases.Add(release);
         return Task.FromResult(release);
@@ -198,6 +201,6 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     protected override Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset)
     {
-        return Task.FromResult(new byte[] { });
+        return Task.FromResult(new byte[0]);
     }
 }

@@ -251,6 +251,11 @@ public abstract class XtiGitHubRepository
 
     protected abstract Task DeleteReleaseAsset(GitHubReleaseAsset asset);
 
+    public async Task<GitHubRelease> LatestRelease() =>
+        (await _LatestRelease()) ?? throw new Exception($"Latest Release not found");
+
+    protected abstract Task<GitHubRelease?> _LatestRelease();
+
     public async Task<GitHubRelease> Release(string tagName) => 
         (await _Release(tagName)) ?? throw new Exception($"Release not found for tag '{tagName}'");
 
