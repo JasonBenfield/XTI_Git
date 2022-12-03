@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Description>Abstractions for managing GitHub repositories.</Description>
-		<PackageTags>XTI;XTI_Git;GitHub</PackageTags>
+		<PackageTags>$(XtiVersion);$(XtiAppKey)</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
