@@ -2,14 +2,11 @@
 
 namespace XTI_Git.Abstractions;
 
-public sealed class XtiMilestoneName
+public sealed partial class XtiMilestoneName
 {
-    private static readonly Regex regex
-        = new Regex("xti_(?<VersionType>(major)|(minor)|(patch))_(?<VersionKey>V?\\d+)", RegexOptions.IgnoreCase);
-
     public static XtiMilestoneName Parse(string text)
     {
-        var match = regex.Match(text);
+        var match = VersionRegex().Match(text);
         return new XtiMilestoneName
         (
             new XtiGitVersion
@@ -28,4 +25,7 @@ public sealed class XtiMilestoneName
 
     public XtiGitVersion Version { get; }
     public string Value { get; }
+
+    [GeneratedRegex("xti_(?<VersionType>(major)|(minor)|(patch))_(?<VersionKey>V?\\d+)", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex VersionRegex();
 }

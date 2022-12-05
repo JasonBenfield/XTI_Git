@@ -56,7 +56,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         var client = await fetchClient();
         var milestones = await client.Issue.Milestone.GetAllForRepository(repoOwner, repoName);
         return milestones
-            .Select(m => new GitHubMilestone(m.Number, m.Title))
+            .Select(m => new GitHubMilestone(m.Number, m.Title, m.Description))
             .ToArray();
     }
 
@@ -67,10 +67,10 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return createGitHubMilestone(milestone);
     }
 
-    protected override async Task _CreateMilestone(string name)
+    protected override async Task _CreateMilestone(string name, string description)
     {
         var client = await fetchClient();
-        var newMilestone = new NewMilestone(name);
+        var newMilestone = new NewMilestone(name) { Description = description };
         await client.Issue.Milestone.Create(repoOwner, repoName, newMilestone);
     }
 
@@ -124,8 +124,8 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
     private static GitHubMilestone createGitHubMilestone(Milestone milestone)
     {
         return milestone == null
-            ? new GitHubMilestone(0, "")
-            : new GitHubMilestone(milestone.Number, milestone.Title, milestone.State.StringValue);
+            ? new GitHubMilestone(0, "", "")
+            : new GitHubMilestone(milestone.Number, milestone.Title, milestone.Description, milestone.State.StringValue);
     }
 
     protected override async Task<bool> _LabelExists(string name)
