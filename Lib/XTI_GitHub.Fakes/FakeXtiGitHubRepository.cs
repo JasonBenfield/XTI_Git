@@ -26,18 +26,18 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     private int milestoneNumber = 321;
 
-    protected override Task _CreateMilestone(string name)
+    protected override Task _CreateMilestone(string name, string description)
     {
         milestones.Add
         (
-            new GitHubMilestone(milestoneNumber, name)
+            new GitHubMilestone(milestoneNumber, name, description)
         );
         milestoneNumber++;
         return Task.CompletedTask;
     }
 
     protected override Task<GitHubMilestone> _Milestone(int number)
-        => Task.FromResult(milestones.FirstOrDefault(m => m.Number == number) ?? new GitHubMilestone(0, ""));
+        => Task.FromResult(milestones.FirstOrDefault(m => m.Number == number) ?? new GitHubMilestone(0, "", ""));
 
     protected override Task<GitHubMilestone[]> _Milestones()
         => Task.FromResult(milestones.ToArray());
@@ -99,7 +99,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.FromResult
         (
             issue
-            ?? new GitHubIssue(0, "", new GitHubMilestone(0, ""), "Open", new string[0], new string[0])
+            ?? new GitHubIssue(0, "", new GitHubMilestone(0, "", ""), "Open", new string[0], new string[0])
         );
     }
 

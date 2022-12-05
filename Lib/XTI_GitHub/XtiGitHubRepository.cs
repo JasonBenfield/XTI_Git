@@ -22,10 +22,11 @@ public abstract class XtiGitHubRepository
         {
             await _CreateBranch(branchName);
         }
-        var milestoneName = newVersion.MilestoneName().Value;
-        if (!await milestoneExists(milestoneName))
+        var milestoneName = newVersion.MilestoneName();
+        var milestoneTitle = milestoneName.Value;
+        if (!await milestoneExists(milestoneTitle))
         {
-            await _CreateMilestone(milestoneName);
+            await _CreateMilestone(milestoneTitle, $"{milestoneName.Version.Key} [{milestoneName.Version.Type}]");
         }
     }
 
@@ -119,7 +120,7 @@ public abstract class XtiGitHubRepository
         var milestoneName = XtiMilestoneName.Parse(issue.Milestone.Title);
         var pullRequest = await _CreatePullRequest
         (
-            $"Pull Request for {issue.Title}",
+            issue.Title,
             $"Closes #{issue.Number}",
             issueBranchName.Value,
             new XtiVersionBranchName(milestoneName.Version).Value
@@ -153,9 +154,12 @@ public abstract class XtiGitHubRepository
         var branches = await _Branches();
         if (branches.Any(b => b.Equals(versionBranchName.Value, StringComparison.OrdinalIgnoreCase)))
         {
+            var prTitle = string.IsNullOrWhiteSpace(milestone.Description)
+                ? milestone.Title
+                : milestone.Description;
             var pullRequest = await _CreatePullRequest
             (
-                $"Pull Request for {versionBranchName.Version.Key}",
+                prTitle,
                 "",
                 versionBranchName.Value,
                 repositoryInfo.DefaultBranch
@@ -227,12 +231,12 @@ public abstract class XtiGitHubRepository
         var milestones = await _Milestones();
         return milestones
             .FirstOrDefault(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase))
-            ?? new GitHubMilestone(0, "");
+            ?? new GitHubMilestone(0, "", "");
     }
 
     protected abstract Task<GitHubMilestone[]> _Milestones();
 
-    protected abstract Task _CreateMilestone(string name);
+    protected abstract Task _CreateMilestone(string name, string description);
 
     public async Task DeleteReleaseIfExists(string tagName)
     {
