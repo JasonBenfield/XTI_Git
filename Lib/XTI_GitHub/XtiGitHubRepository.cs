@@ -85,9 +85,9 @@ public abstract class XtiGitHubRepository
         {
             update.AddLabel(inProgress);
         }
-        if (!issue.Assignees.Any(a => a.Equals(repoOwner, StringComparison.OrdinalIgnoreCase)))
+        if (!issue.Assignees.Any(a => a.Equals(issue.UserLogin, StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(issue.UserLogin))
         {
-            update.AddAssignee(repoOwner);
+            update.AddAssignee(issue.UserLogin);
         }
         var milestone = await getMilestone(version.MilestoneName().Value);
         if (issue.Milestone.Number != milestone.Number)

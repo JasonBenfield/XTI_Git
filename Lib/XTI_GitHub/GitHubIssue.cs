@@ -6,6 +6,7 @@ public sealed record GitHubIssue
 (
     int Number,
     string Title,
+    string UserLogin,
     GitHubMilestone Milestone,
     string State,
     string[] Labels,

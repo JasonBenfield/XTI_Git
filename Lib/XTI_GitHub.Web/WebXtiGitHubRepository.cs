@@ -114,6 +114,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         (
             issue.Number,
             issue.Title,
+            issue.User.Login,
             createGitHubMilestone(issue.Milestone),
             issue.State.StringValue,
             issue.Labels.Select(l => l.Name).ToArray(),
