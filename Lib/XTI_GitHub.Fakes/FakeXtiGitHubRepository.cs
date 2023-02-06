@@ -69,6 +69,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         (
             issueNumber,
             issueTitle,
+            "",
             milestone,
             "Open",
             new string[0],
@@ -99,7 +100,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.FromResult
         (
             issue
-            ?? new GitHubIssue(0, "", new GitHubMilestone(0, "", ""), "Open", new string[0], new string[0])
+            ?? new GitHubIssue(0, "", "", new GitHubMilestone(0, "", ""), "Open", new string[0], new string[0])
         );
     }
 
