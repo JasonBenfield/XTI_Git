@@ -1,6 +1,4 @@
 ﻿using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
-using XTI_Git.Abstractions;
 
 namespace XTI_Git.GitLib;
 

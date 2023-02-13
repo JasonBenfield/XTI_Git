@@ -11,17 +11,23 @@ internal sealed class RepositoryTest
     private static readonly string gitRepoPath = "c:\\xti\\appdata\\Test\\GitTest";
 
     [Test]
+    public async Task ShouldCreateRepositoryForOrg()
+    {
+        var services = setup();
+        var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
+        var gitHubRepo = await gitHubFactory.CreateNewOrganizationGitHubRepositoryIfNotExists("GreerCPW", "TestLib3");
+        var repo = await gitHubRepo.RepositoryInformation();
+        repo.WriteToConsole();
+    }
+
+    [Test]
     public async Task ShouldCreateRepository()
     {
         var services = setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
-        var gitHubRepo = await gitHubFactory.CreateNewGitHubRepositoryIfNotExists("JasonBenfield", "TestLib");
+        var gitHubRepo = await gitHubFactory.CreateNewGitHubRepositoryIfNotExists("JasonBenfield", "TestLib2");
         var gitHubInfo = await gitHubRepo.RepositoryInformation();
-        Console.WriteLine(JsonSerializer.Serialize(gitHubInfo, new JsonSerializerOptions { WriteIndented = true }));
-        var testLibDir = Path.Combine(gitRepoPath);
-        if (Directory.Exists(testLibDir)) { Directory.Delete(testLibDir, true); }
-        var gitFactory = services.GetRequiredService<IXtiGitFactory>();
-        await gitFactory.CloneRepository(gitHubInfo.CloneUrl, gitRepoPath);
+        gitHubInfo.WriteToConsole();
     }
 
     private IServiceProvider setup()
