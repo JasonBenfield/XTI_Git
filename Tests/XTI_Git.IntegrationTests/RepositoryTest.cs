@@ -25,9 +25,17 @@ internal sealed class RepositoryTest
     {
         var services = setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
-        var gitHubRepo = await gitHubFactory.CreateNewGitHubRepositoryIfNotExists("JasonBenfield", "TestLib2");
+        const string repoOwner = "JasonBenfield";
+        const string repoName = "TestLib4";
+        var gitHubRepo = await gitHubFactory.CreateNewGitHubRepositoryIfNotExists(repoOwner, repoName);
         var gitHubInfo = await gitHubRepo.RepositoryInformation();
         gitHubInfo.WriteToConsole();
+        var testLibDir = Path.Combine("C:", "xti", "src", repoOwner, repoName);
+        if (Directory.Exists(testLibDir)) { Directory.Delete(testLibDir, true); }
+        var gitFactory = services.GetRequiredService<IXtiGitFactory>();
+        await gitFactory.CloneRepository(gitHubInfo.CloneUrl, testLibDir);
+
+
     }
 
     private IServiceProvider setup()

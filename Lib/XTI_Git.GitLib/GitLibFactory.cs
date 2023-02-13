@@ -1,4 +1,5 @@
 ﻿using LibGit2Sharp;
+using XTI_Git.Abstractions;
 
 namespace XTI_Git.GitLib;
 
@@ -20,10 +21,22 @@ public sealed class GitLibFactory : IXtiGitFactory
             path,
             new CloneOptions
             {
-                CredentialsProvider = credentialsHandler,
-                BranchName = "main"
+                CredentialsProvider = credentialsHandler
             }
         );
+        using (var git = new Repository(path))
+        {
+            var signature = await credentials.Signature();
+            git.Commit("Initial Commit", signature, signature);
+            var branch = git.CreateBranch("main");
+            git.Branches.Update
+            (
+                branch,
+                (bu) => bu.Remote = git.Network.Remotes["origin"].Name,
+                (bu) => bu.UpstreamBranch = branch.CanonicalName
+            );
+            Commands.Checkout(git, branch);
+        }
         return CreateRepository(path);
     }
 
