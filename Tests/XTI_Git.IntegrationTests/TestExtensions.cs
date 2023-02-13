@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 using XTI_Core;
 using XTI_Git.Abstractions;
 using XTI_Git.GitLib;
@@ -22,4 +23,7 @@ internal static class TestExtensions
         services.AddScoped<IXtiGitFactory, GitLibFactory>();
         services.AddScoped(sp => sp.GetRequiredService<IXtiGitFactory>().CreateRepository(gitRepoPath));
     }
+
+    public static void WriteToConsole(this object data) =>
+        Console.WriteLine(XtiSerializer.Serialize(data, new JsonSerializerOptions {  WriteIndented = true }));
 }

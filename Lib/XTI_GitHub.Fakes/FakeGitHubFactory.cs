@@ -7,4 +7,7 @@ public sealed class FakeGitHubFactory : IGitHubFactory
 
     public XtiGitHubRepository CreateGitHubRepository(string owner, string name) =>
         new FakeXtiGitHubRepository(owner, name);
+
+    public Task<XtiGitHubRepository> CreateNewOrganizationGitHubRepositoryIfNotExists(string organization, string name) =>
+        Task.FromResult(CreateGitHubRepository(organization, name));
 }
