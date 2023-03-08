@@ -309,7 +309,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
     {
         var client = await fetchClient();
         var release = await getRelease(gitHubRelease);
-        var upload = new ReleaseAssetUpload(asset.FileName, asset.ContentType, asset.Stream, null);
+        var upload = new ReleaseAssetUpload(asset.FileName, asset.ContentType, asset.Stream, TimeSpan.FromMinutes(15));
         await client.Repository.Release.UploadAsset(release, upload);
     }
 
