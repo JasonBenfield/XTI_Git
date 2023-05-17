@@ -51,7 +51,7 @@ internal sealed class ReleaseTest
         await repo.UploadReleaseAsset
         (
             release,
-            new FileUpload(stream, "test1.zip", "application/zip")
+            new GitHubFileUpload(stream, "test1.zip", "application/zip")
         );
     }
 
