@@ -190,7 +190,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     protected override Task DeleteReleaseAsset(GitHubReleaseAsset asset) => Task.CompletedTask;
 
-    protected override Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset)
+    protected override Task _UploadReleaseAsset(GitHubRelease release, GitHubFileUpload asset)
     {
         return Task.CompletedTask;
     }

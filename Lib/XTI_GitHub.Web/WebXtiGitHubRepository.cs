@@ -305,7 +305,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Repository.Release.DeleteAsset(repoOwner, repoName, asset.ID);
     }
 
-    protected override async Task _UploadReleaseAsset(GitHubRelease gitHubRelease, FileUpload asset)
+    protected override async Task _UploadReleaseAsset(GitHubRelease gitHubRelease, GitHubFileUpload asset)
     {
         var client = await fetchClient();
         var release = await getRelease(gitHubRelease);

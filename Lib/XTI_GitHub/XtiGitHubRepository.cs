@@ -270,9 +270,9 @@ public abstract class XtiGitHubRepository
 
     protected abstract Task<GitHubRelease> _CreateRelease(string tagName, string name, string body);
 
-    public Task UploadReleaseAsset(GitHubRelease release, FileUpload asset) => _UploadReleaseAsset(release, asset);
+    public Task UploadReleaseAsset(GitHubRelease release, GitHubFileUpload asset) => _UploadReleaseAsset(release, asset);
 
-    protected abstract Task _UploadReleaseAsset(GitHubRelease release, FileUpload asset);
+    protected abstract Task _UploadReleaseAsset(GitHubRelease release, GitHubFileUpload asset);
 
     public Task FinalizeRelease(GitHubRelease release) => _FinalizeRelease(release);
 
