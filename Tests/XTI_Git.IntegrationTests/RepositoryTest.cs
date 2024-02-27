@@ -11,6 +11,16 @@ internal sealed class RepositoryTest
     private static readonly string gitRepoPath = "c:\\xti\\appdata\\Test\\GitTest";
 
     [Test]
+    public async Task ShouldGetIssue()
+    {
+        var services = setup();
+        var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
+        var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
+        var repo = await gitHubRepo.Issue(280);
+        repo.WriteToConsole();
+    }
+
+    [Test]
     public async Task ShouldCreateRepositoryForOrg()
     {
         var services = setup();
