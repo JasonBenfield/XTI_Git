@@ -11,9 +11,19 @@ internal sealed class RepositoryTest
     private static readonly string gitRepoPath = "c:\\xti\\appdata\\Test\\GitTest";
 
     [Test]
+    public async Task ShouldGetIssue()
+    {
+        var services = Setup();
+        var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
+        var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
+        var repo = await gitHubRepo.Issue(208);
+        repo.WriteToConsole();
+    }
+
+    [Test]
     public async Task ShouldCreateRepositoryForOrg()
     {
-        var services = setup();
+        var services = Setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
         var gitHubRepo = await gitHubFactory.CreateNewOrganizationGitHubRepositoryIfNotExists("GreerCPW", "TestLib3");
         var repo = await gitHubRepo.RepositoryInformation();
@@ -23,7 +33,7 @@ internal sealed class RepositoryTest
     [Test]
     public async Task ShouldCreateRepository()
     {
-        var services = setup();
+        var services = Setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
         const string repoOwner = "JasonBenfield";
         const string repoName = "TestLib4";
@@ -38,7 +48,7 @@ internal sealed class RepositoryTest
 
     }
 
-    private IServiceProvider setup()
+    private IServiceProvider Setup()
     {
         var hostBuilder = new XtiHostBuilder();
         hostBuilder.Services.AddTestServices("JasonBenfield", "XTI_GitLab", gitRepoPath);
