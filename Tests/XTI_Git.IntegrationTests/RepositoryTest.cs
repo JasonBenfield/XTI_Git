@@ -21,6 +21,18 @@ internal sealed class RepositoryTest
     }
 
     [Test]
+    public async Task ShouldDownloadAsset()
+    {
+        var services = setup();
+        var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
+        var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
+        var release = await gitHubRepo.Release("v1.2.21");
+        var asset = release.Assets.First();
+        var bytes = await gitHubRepo.DownloadReleaseAsset(asset);
+        File.WriteAllBytes($"c:\\xti\\{asset.Name}", bytes);
+    }
+
+    [Test]
     public async Task ShouldCreateRepositoryForOrg()
     {
         var services = setup();
