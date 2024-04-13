@@ -326,7 +326,14 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
     {
         var client = await fetchClient();
         var response = await client.Connection.Get<object>(new Uri(asset.Url), new Dictionary<string, string>(), "application/octet-stream");
-        return (byte[])response.Body;
+        byte[] bytes;
+        var stream = (Stream)response.Body;
+        using (var memoryStream = new MemoryStream())
+        {
+            stream.CopyTo(memoryStream);
+            bytes = memoryStream.ToArray();
+        }
+        return bytes;
     }
 
     private async Task<Release> getRelease(GitHubRelease gitHubRelease)

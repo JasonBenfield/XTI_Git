@@ -16,8 +16,25 @@ internal sealed class RepositoryTest
         var services = Setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
         var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
-        var repo = await gitHubRepo.Issue(208);
+        var repo = await gitHubRepo.Issue(280);
         repo.WriteToConsole();
+    }
+
+    [Test]
+    public async Task ShouldDownloadAsset()
+    {
+        var services = Setup();
+        var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
+        var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
+        var release = await gitHubRepo.Release("v1.2.21");
+        var asset = release.Assets.First();
+        var bytes = await gitHubRepo.DownloadReleaseAsset(asset);
+        var fileName = $"c:\\xti\\{asset.Name}";
+        if (File.Exists(fileName))
+        {
+            File.Delete(fileName);
+        }
+        File.WriteAllBytes(fileName, bytes);
     }
 
     [Test]

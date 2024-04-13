@@ -15,14 +15,13 @@ public sealed class GitLibFactory : IXtiGitFactory
     public async Task<IXtiGitRepository> CloneRepository(string repoUrl, string path)
     {
         var credentialsHandler = await credentials.CredentialsHandler();
+        var cloneOptions = new CloneOptions();
+        cloneOptions.FetchOptions.CredentialsProvider = credentialsHandler;
         Repository.Clone
         (
             repoUrl,
             path,
-            new CloneOptions
-            {
-                CredentialsProvider = credentialsHandler
-            }
+            cloneOptions
         );
         using (var git = new Repository(path))
         {
