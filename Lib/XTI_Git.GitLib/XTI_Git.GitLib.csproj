@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Description>LibGit2Sharp implementations for managing local git repositories.</Description>
@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="LibGit2Sharp" Version="0.29.0" />
+		<PackageReference Include="LibGit2Sharp" Version="0.30.0" />
 	</ItemGroup>
 
 	<ItemGroup>
