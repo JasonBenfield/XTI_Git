@@ -8,7 +8,7 @@ namespace XTI_Git.IntegrationTests;
 
 internal sealed class RepositoryTest
 {
-    private static readonly string gitRepoPath = "c:\\xti\\appdata\\Test\\GitTest";
+    private static readonly string gitRepoPath = "C:\\XTI\\src\\JasonBenfield\\SharedWebApp";
 
     [Test]
     public async Task ShouldGetIssue()
@@ -61,14 +61,21 @@ internal sealed class RepositoryTest
         if (Directory.Exists(testLibDir)) { Directory.Delete(testLibDir, true); }
         var gitFactory = services.GetRequiredService<IXtiGitFactory>();
         await gitFactory.CloneRepository(gitHubInfo.CloneUrl, testLibDir);
+    }
 
-
+    [Test]
+    public async Task ShouldCheckoutBranch()
+    {
+        var services = Setup();
+        var gitFactory = services.GetRequiredService<IXtiGitFactory>();
+        var gitRepo = gitFactory.CreateRepository(gitRepoPath);
+        await gitRepo.CheckoutBranch("xti/Patch/V1433");
     }
 
     private IServiceProvider Setup()
     {
         var hostBuilder = new XtiHostBuilder();
-        hostBuilder.Services.AddTestServices("JasonBenfield", "XTI_GitLab", gitRepoPath);
+        hostBuilder.Services.AddTestServices("JasonBenfield", "SharedWebApp", gitRepoPath);
         return hostBuilder.Build().Scope();
     }
 }

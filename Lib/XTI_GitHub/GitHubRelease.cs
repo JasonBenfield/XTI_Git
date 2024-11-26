@@ -1,3 +1,3 @@
 ﻿namespace XTI_GitHub;
 
-public sealed record GitHubRelease(int ID, string TagName, GitHubReleaseAsset[] Assets);
+public sealed record GitHubRelease(long ID, string TagName, GitHubReleaseAsset[] Assets);
