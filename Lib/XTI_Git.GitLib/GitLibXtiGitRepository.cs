@@ -14,16 +14,20 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
         this.gitLibCredentials = gitLibCredentials;
     }
 
-    private Repository fetchRepo() => cachedRepo ??= new Repository(path);
+    private Repository FetchRepo() => cachedRepo ??= new Repository(path);
 
-    public string CurrentBranchName() => fetchRepo().Head.FriendlyName;
+    public string CurrentBranchName() => FetchRepo().Head.FriendlyName;
 
     public async Task CheckoutBranch(string branchName)
     {
         if (CurrentBranchName() != branchName)
         {
-            var repo = fetchRepo();
-            await pull(repo);
+            var repo = FetchRepo();
+            try
+            {
+                await Pull(repo);
+            }
+            catch (MergeFetchHeadNotFoundException) { }
             var branch = repo.Branches.FirstOrDefault(b => b.FriendlyName == branchName);
             if (branch == null)
             {
@@ -36,13 +40,13 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
                 );
             }
             Commands.Checkout(repo, branch);
-            await pull(repo);
+            await Pull(repo);
         }
     }
 
     public void DeleteBranch(string branchName)
     {
-        var repo = fetchRepo();
+        var repo = FetchRepo();
         var branch = repo.Branches.FirstOrDefault(b => b.FriendlyName == branchName);
         if (branch != null)
         {
@@ -50,7 +54,7 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
         }
     }
 
-    private async Task pull(Repository repo)
+    private async Task Pull(Repository repo)
     {
         var credentialsHandler = await gitLibCredentials.CredentialsHandler();
         var remoteRefs = repo.Network.ListReferences
@@ -58,7 +62,10 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
             repo.Network.Remotes["origin"],
             credentialsHandler
         );
-        if (remoteRefs.Any(r => r.CanonicalName.Equals($"refs/heads/{repo.Head.FriendlyName}", StringComparison.OrdinalIgnoreCase)))
+        var currentBranchRefs = remoteRefs
+            .Where(r => r.CanonicalName.Equals($"refs/heads/{repo.Head.FriendlyName}", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (currentBranchRefs.Any())
         {
             var signature = await gitLibCredentials.Signature();
             var options = new PullOptions
@@ -74,7 +81,7 @@ public sealed class GitLibXtiGitRepository : IXtiGitRepository
 
     public async Task CommitChanges(string message)
     {
-        var repo = fetchRepo();
+        var repo = FetchRepo();
         Commands.Stage(repo, "*");
         var diff = repo.Diff.Compare<TreeChanges>(repo.Head.Tip.Tree, DiffTargets.Index);
         if (diff.Any())
