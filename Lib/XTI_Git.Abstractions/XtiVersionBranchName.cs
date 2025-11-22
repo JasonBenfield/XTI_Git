@@ -7,7 +7,7 @@ public sealed class XtiVersionBranchName : XtiBranchName
     private static readonly Regex regex
         = new Regex("xti/(?<VersionType>(major)|(minor)|(patch))/(?<VersionKey>V?\\d+)", RegexOptions.IgnoreCase);
 
-    public static bool CanParse(string text) => regex.IsMatch(text);
+    public static new bool CanParse(string text) => regex.IsMatch(text);
 
     public static new XtiVersionBranchName Parse(string text)
     {
