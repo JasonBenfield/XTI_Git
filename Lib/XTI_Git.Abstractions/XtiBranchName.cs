@@ -2,6 +2,9 @@
 
 public class XtiBranchName
 {
+    public static bool CanParse(string text) =>
+        XtiVersionBranchName.CanParse(text) || XtiIssueBranchName.CanParse(text);
+
     public static XtiBranchName Parse(string text)
     {
         if (XtiVersionBranchName.CanParse(text))
