@@ -8,12 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
 		<PackageReference Include="NUnit" Version="4.4.0" />
-		<PackageReference Include="NUnit3TestAdapter" Version="5.2.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="6.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-		<PackageReference Include="XTI_Core.Extensions" Version="1.10.26-dev251122155254802" />
-		<PackageReference Include="XTI_Secrets.Extensions" Version="1.8.14-dev251122160128621" />
+		<PackageReference Include="XTI_Core.Extensions" Version="1.10.26-dev260131102223367" />
+		<PackageReference Include="XTI_Secrets.Extensions" Version="1.8.14-dev260131102818704" />
 	</ItemGroup>
 
 	<ItemGroup>
