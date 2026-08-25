@@ -34,7 +34,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return new GitHubRepo(repo.Name, repo.CloneUrl, repo.DefaultBranch);
     }
 
-    protected override async Task<string[]> _Branches()
+    protected override async Task<string[]> _Branches(CancellationToken ct)
     {
         var client = await fetchClient();
         var branches = await client.Repository.Branch.GetAll(repoOwner, repoName);
@@ -43,7 +43,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
             .ToArray();
     }
 
-    protected override async Task _CreateBranch(string name)
+    protected override async Task _CreateBranch(string name, CancellationToken ct)
     {
         var client = await fetchClient();
         var repo = await client.Repository.Get(repoOwner, repoName);
@@ -51,7 +51,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Git.Reference.Create(repoOwner, repoName, new NewReference($"refs/heads/{name}", defaultBranch.Object.Sha));
     }
 
-    protected override async Task<GitHubMilestone[]> _Milestones()
+    protected override async Task<GitHubMilestone[]> _Milestones(CancellationToken ct)
     {
         var client = await fetchClient();
         var milestones = await client.Issue.Milestone.GetAllForRepository(repoOwner, repoName);
@@ -60,21 +60,21 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
             .ToArray();
     }
 
-    protected override async Task<GitHubMilestone> _Milestone(int number)
+    protected override async Task<GitHubMilestone> _Milestone(int number, CancellationToken ct)
     {
         var client = await fetchClient();
         var milestone = await client.Issue.Milestone.Get(repoOwner, repoName, number);
         return createGitHubMilestone(milestone);
     }
 
-    protected override async Task _CreateMilestone(string name, string description)
+    protected override async Task _CreateMilestone(string name, string description, CancellationToken ct)
     {
         var client = await fetchClient();
         var newMilestone = new NewMilestone(name) { Description = description };
         await client.Issue.Milestone.Create(repoOwner, repoName, newMilestone);
     }
 
-    protected override async Task<GitHubIssue[]> _Issues(FilterIssueRequest request)
+    protected override async Task<GitHubIssue[]> _Issues(FilterIssueRequest request, CancellationToken ct)
     {
         var client = await fetchClient();
         var issueRequest = new RepositoryIssueRequest
@@ -90,7 +90,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
             .ToArray();
     }
 
-    protected override async Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle)
+    protected override async Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle, CancellationToken ct)
     {
         var client = await fetchClient();
         var newIssue = new NewIssue(issueTitle)
@@ -101,7 +101,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return createGitHubIssue(issue);
     }
 
-    protected override async Task<GitHubIssue> _Issue(int number)
+    protected override async Task<GitHubIssue> _Issue(int number, CancellationToken ct)
     {
         var client = await fetchClient();
         var issue = await client.Issue.Get(repoOwner, repoName, number);
@@ -129,20 +129,20 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
             : new GitHubMilestone(milestone.Number, milestone.Title, milestone.Description, milestone.State.StringValue);
     }
 
-    protected override async Task<bool> _LabelExists(string name)
+    protected override async Task<bool> _LabelExists(string name, CancellationToken ct)
     {
         var client = await fetchClient();
         var labels = await client.Issue.Labels.GetAllForRepository(repoOwner, repoName);
         return labels.Any(l => l.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
-    protected override async Task _CreateLabel(string name, string color)
+    protected override async Task _CreateLabel(string name, string color, CancellationToken ct)
     {
         var client = await fetchClient();
         await client.Issue.Labels.Create(repoOwner, repoName, new NewLabel(name, color));
     }
 
-    protected override async Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate)
+    protected override async Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate, CancellationToken ct)
     {
         var client = await fetchClient();
         var issue = await client.Issue.Get(repoOwner, repoName, ghIssue.Number);
@@ -164,7 +164,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Issue.Update(repoOwner, repoName, ghIssue.Number, update);
     }
 
-    protected override async Task<GitHubPullRequest[]> _PullRequests()
+    protected override async Task<GitHubPullRequest[]> _PullRequests(CancellationToken ct)
     {
         var client = await fetchClient();
         var pullRequests = await client.PullRequest.GetAllForRepository(repoOwner, repoName);
@@ -173,7 +173,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
             .ToArray();
     }
 
-    protected override async Task<GitHubPullRequest> _CreatePullRequest(string title, string body, string head, string baseRef)
+    protected override async Task<GitHubPullRequest> _CreatePullRequest(string title, string body, string head, string baseRef, CancellationToken ct)
     {
         var client = await fetchClient();
         var pullRequest = await client.PullRequest.Create
@@ -188,14 +188,24 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return createGitHubPullRequest(pullRequest);
     }
 
-    protected override async Task _MergePullRequest(GitHubPullRequest pullRequest)
+    protected override async Task _MergePullRequest(GitHubPullRequest pullRequestData, CancellationToken ct)
     {
         var client = await fetchClient();
+        var pullRequest = await client.PullRequest.Get(repoOwner, repoName, pullRequestData.Number);
+        var maxTime = DateTimeOffset.UtcNow.AddMinutes(5);
+        while (pullRequest.Mergeable != true && DateTimeOffset.UtcNow < maxTime)
+        {
+            await Task.Delay(1000, ct);
+        }
+        if (pullRequest.Mergeable != true)
+        {
+            throw new Exception($"Pull Request {pullRequestData.Number} is not mergeable");
+        }
         var mergeRequest = new MergePullRequest();
-        await client.PullRequest.Merge(repoOwner, repoName, pullRequest.Number, mergeRequest);
+        await client.PullRequest.Merge(repoOwner, repoName, pullRequestData.Number, mergeRequest);
     }
 
-    protected override async Task _LinkPullRequest(GitHubPullRequest ghPullRequest, GitHubIssue ghIssue)
+    protected override async Task _LinkPullRequest(GitHubPullRequest ghPullRequest, GitHubIssue ghIssue, CancellationToken ct)
     {
         var client = await fetchClient();
         var commits = await client.PullRequest.Commits(repoOwner, repoName, ghPullRequest.Number);
@@ -224,7 +234,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         );
     }
 
-    protected override async Task _CloseMilestone(GitHubMilestone ghMilestone)
+    protected override async Task _CloseMilestone(GitHubMilestone ghMilestone, CancellationToken ct)
     {
         var client = await fetchClient();
         var milestone = await client.Issue.Milestone.Get(repoOwner, repoName, ghMilestone.Number);
@@ -238,7 +248,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Issue.Milestone.Update(repoOwner, repoName, milestone.Number, update);
     }
 
-    protected override async Task<GitHubRelease?> _LatestRelease()
+    protected override async Task<GitHubRelease?> _LatestRelease(CancellationToken ct)
     {
         var client = await fetchClient();
         GitHubRelease? release;
@@ -254,7 +264,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return release;
     }
 
-    protected override async Task<GitHubRelease?> _Release(string tagName)
+    protected override async Task<GitHubRelease?> _Release(string tagName, CancellationToken ct)
     {
         var client = await fetchClient();
         GitHubRelease? release;
@@ -270,13 +280,13 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         return release;
     }
 
-    protected override async Task DeleteRelease(GitHubRelease gitHubRelease)
+    protected override async Task DeleteRelease(GitHubRelease gitHubRelease, CancellationToken ct)
     {
         var client = await fetchClient();
         await client.Repository.Release.Delete(repoOwner, repoName, gitHubRelease.ID);
     }
 
-    protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
+    protected override async Task<GitHubRelease> _CreateRelease(string tagName, string name, string body, CancellationToken ct)
     {
         var newRelease = new NewRelease(tagName);
         newRelease.Name = name;
@@ -299,13 +309,13 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         );
     }
 
-    protected override async Task DeleteReleaseAsset(GitHubReleaseAsset asset)
+    protected override async Task DeleteReleaseAsset(GitHubReleaseAsset asset, CancellationToken ct)
     {
         var client = await fetchClient();
         await client.Repository.Release.DeleteAsset(repoOwner, repoName, asset.ID);
     }
 
-    protected override async Task _UploadReleaseAsset(GitHubRelease gitHubRelease, GitHubFileUpload asset)
+    protected override async Task _UploadReleaseAsset(GitHubRelease gitHubRelease, GitHubFileUpload asset, CancellationToken ct)
     {
         var client = await fetchClient();
         var release = await getRelease(gitHubRelease);
@@ -313,7 +323,7 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Repository.Release.UploadAsset(release, upload);
     }
 
-    protected override async Task _FinalizeRelease(GitHubRelease gitHubRelease)
+    protected override async Task _FinalizeRelease(GitHubRelease gitHubRelease, CancellationToken ct)
     {
         var client = await fetchClient();
         var release = await getRelease(gitHubRelease);
@@ -322,10 +332,15 @@ internal sealed class WebXtiGitHubRepository : XtiGitHubRepository
         await client.Repository.Release.Edit(repoOwner, repoName, release.Id, update);
     }
 
-    protected override async Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset)
+    protected override async Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset, CancellationToken ct)
     {
         var client = await fetchClient();
-        var response = await client.Connection.Get<object>(new Uri(asset.Url), new Dictionary<string, string>(), "application/octet-stream");
+        var response = await client.Connection.Get<object>
+        (
+            new Uri(asset.Url),
+            new Dictionary<string, string>(),
+            "application/octet-stream"
+        );
         byte[] bytes;
         var stream = (Stream)response.Body;
         using (var memoryStream = new MemoryStream())

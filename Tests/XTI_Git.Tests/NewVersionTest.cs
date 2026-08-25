@@ -17,8 +17,8 @@ internal sealed class NewVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
-        var branches = await repo.Branches();
+        await repo.CreateNewVersion(newVersion, ct: default);
+        var branches = await repo.Branches(ct: default);
         Assert.That(branches.Length, Is.EqualTo(1), "Should create branch for new version");
         Assert.That(branches[0], Is.EqualTo($"xti/{newVersion.Type}/{newVersion.Key}"), "Should name the branch after the new version");
     }
@@ -29,9 +29,9 @@ internal sealed class NewVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
-        await repo.CreateNewVersion(newVersion);
-        var branches = await repo.Branches();
+        await repo.CreateNewVersion(newVersion, ct: default);
+        await repo.CreateNewVersion(newVersion, ct: default);
+        var branches = await repo.Branches(ct: default);
         Assert.That(branches.Length, Is.EqualTo(1), "Should not create duplicate branch for new version");
     }
 
@@ -41,8 +41,8 @@ internal sealed class NewVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
-        var milestones = await repo.Milestones();
+        await repo.CreateNewVersion(newVersion, ct: default);
+        var milestones = await repo.Milestones(ct: default);
         Assert.That(milestones.Length, Is.EqualTo(1), "Should create milestone for new version");
         Assert.That
         (
@@ -58,9 +58,9 @@ internal sealed class NewVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
-        await repo.CreateNewVersion(newVersion);
-        var milestones = await repo.Milestones();
+        await repo.CreateNewVersion(newVersion, ct: default);
+        await repo.CreateNewVersion(newVersion, ct: default);
+        var milestones = await repo.Milestones(ct: default);
         Assert.That(milestones.Length, Is.EqualTo(1), "Should not create duplicate milestone for new version");
     }
 

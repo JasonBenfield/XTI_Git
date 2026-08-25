@@ -16,12 +16,12 @@ public sealed class CompleteIssueTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         var gitRepo = getGitRepo(services);
         await gitRepo.CheckoutBranch(newVersion.BranchName().Value);
         const string issueTitle = "Test Issue";
-        var issue = await repo.CreateIssue(newVersion, issueTitle);
-        await repo.StartIssue(newVersion, issue.Number);
+        var issue = await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.StartIssue(newVersion, issue.Number, ct: default);
         await gitRepo.CheckoutBranch(issue.BranchName().Value);
 
         var changedLine = Guid.NewGuid().ToString("N");
@@ -31,8 +31,8 @@ public sealed class CompleteIssueTest
         }
         await gitRepo.CommitChanges($"Complete issue test {changedLine}");
 
-        await repo.CompleteIssue(issue.BranchName());
-        var pullRequests = await repo.PullRequests();
+        await repo.CompleteIssue(issue.BranchName(), ct: default);
+        var pullRequests = await repo.PullRequests(ct: default);
     }
 
     private IServiceProvider setup()

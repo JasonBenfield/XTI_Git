@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using XTI_Core.Extensions;
 using XTI_Git.Abstractions;
 using XTI_GitHub;
-using XTI_GitHub.Fakes;
 
 namespace XTI_Git.Tests;
 
@@ -19,10 +17,10 @@ internal sealed class CompleteVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         var versionBranchName = new XtiVersionBranchName(newVersion);
-        await repo.CompleteVersion(versionBranchName);
-        var pullRequests = await repo.PullRequests();
+        await repo.CompleteVersion(versionBranchName, ct: default);
+        var pullRequests = await repo.PullRequests(ct: default);
         Assert.That(pullRequests.Length, Is.EqualTo(1), "Should create pull request");
         Assert.That(pullRequests[0].Head, Is.EqualTo("xti/Patch/V1"), "Should create pull request");
         Assert.That(pullRequests[0].Base, Is.EqualTo("main"), "Should create pull request");
@@ -34,10 +32,10 @@ internal sealed class CompleteVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         var versionBranchName = new XtiVersionBranchName(newVersion);
-        await repo.CompleteVersion(versionBranchName);
-        var pullRequests = await repo.PullRequests();
+        await repo.CompleteVersion(versionBranchName, ct: default);
+        var pullRequests = await repo.PullRequests(ct: default);
         Assert.That(pullRequests[0].IsOpen(), Is.False, "Should close pull request");
     }
 
@@ -47,14 +45,14 @@ internal sealed class CompleteVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         const string issueTitle = "Test Issue";
-        var issue = await repo.CreateIssue(newVersion, issueTitle);
-        await repo.StartIssue(newVersion, issue.Number);
-        await repo.CompleteIssue(new XtiIssueBranchName(issue.Number, issue.Title));
+        var issue = await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.StartIssue(newVersion, issue.Number, ct: default);
+        await repo.CompleteIssue(new XtiIssueBranchName(issue.Number, issue.Title), ct: default);
         var versionBranchName = new XtiVersionBranchName(newVersion);
-        await repo.CompleteVersion(versionBranchName);
-        var issues = await repo.Issues();
+        await repo.CompleteVersion(versionBranchName, ct: default);
+        var issues = await repo.Issues(ct: default);
         Assert.That(issues[0].Labels, Has.None.EqualTo("close pending"), "Should remove close pending label from issue");
     }
 
@@ -64,14 +62,14 @@ internal sealed class CompleteVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         const string issueTitle = "Test Issue";
-        var issue = await repo.CreateIssue(newVersion, issueTitle);
-        await repo.StartIssue(newVersion, issue.Number);
-        await repo.CompleteIssue(new XtiIssueBranchName(issue.Number, issue.Title));
+        var issue = await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.StartIssue(newVersion, issue.Number, ct: default);
+        await repo.CompleteIssue(new XtiIssueBranchName(issue.Number, issue.Title), ct: default);
         var versionBranchName = new XtiVersionBranchName(newVersion);
-        await repo.CompleteVersion(versionBranchName);
-        var issues = await repo.Issues();
+        await repo.CompleteVersion(versionBranchName, ct: default);
+        var issues = await repo.Issues(ct: default);
         Assert.That(issues[0].IsOpen(), Is.False, "Should close issue");
     }
 
@@ -81,14 +79,14 @@ internal sealed class CompleteVersionTest
         var services = setup();
         var repo = getRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         const string issueTitle = "Test Issue";
-        var issue = await repo.CreateIssue(newVersion, issueTitle);
-        await repo.StartIssue(newVersion, issue.Number);
-        await repo.CompleteIssue(new XtiIssueBranchName(issue.Number, issue.Title));
+        var issue = await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.StartIssue(newVersion, issue.Number, ct: default);
+        await repo.CompleteIssue(new XtiIssueBranchName(issue.Number, issue.Title), ct: default);
         var versionBranchName = new XtiVersionBranchName(newVersion);
-        await repo.CompleteVersion(versionBranchName);
-        var milestones = await repo.Milestones();
+        await repo.CompleteVersion(versionBranchName, ct: default);
+        var milestones = await repo.Milestones(ct: default);
         var milestone = milestones
             .First(m => m.Title == newVersion.MilestoneName().Value);
         Assert.That(milestone.IsOpen(), Is.False, $"Should close milestone {milestone.Title}");

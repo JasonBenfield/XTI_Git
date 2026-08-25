@@ -16,7 +16,7 @@ internal sealed class ReleaseTest
     {
         var services = setup();
         var repo = getGitHubRepo(services);
-        var release = await repo.LatestRelease();
+        var release = await repo.LatestRelease(ct: default);
         Console.WriteLine(XtiSerializer.Serialize(release, new JsonSerializerOptions { WriteIndented = true }));
     }
 
@@ -25,8 +25,8 @@ internal sealed class ReleaseTest
     {
         var services = setup();
         var repo = getGitHubRepo(services);
-        var release = await repo.Release("v1.0-alpha");
-        var asset = await repo.DownloadReleaseAsset(release.Assets[0]);
+        var release = await repo.Release("v1.0-alpha", ct: default);
+        var asset = await repo.DownloadReleaseAsset(release.Assets[0], ct: default);
         var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, "hub.zip");
         if (File.Exists(path)) { File.Delete(path); }
         using (var writer = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write))
@@ -46,12 +46,14 @@ internal sealed class ReleaseTest
         (
             "v1.1-alpha",
             "Test Upload",
-            "Testing"
+            "Testing",
+            ct: default
         );
         await repo.UploadReleaseAsset
         (
             release,
-            new GitHubFileUpload(stream, "test1.zip", "application/zip")
+            new GitHubFileUpload(stream, "test1.zip", "application/zip"),
+            ct: default
         );
     }
 

@@ -17,8 +17,8 @@ internal sealed class NewVersionTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V13");
-        await repo.CreateNewVersion(newVersion);
-        var branches = await repo.Branches();
+        await repo.CreateNewVersion(newVersion, ct: default);
+        var branches = await repo.Branches(ct: default);
         var newVersionBranch = branches.FirstOrDefault(b => b == $"xti/{newVersion.Type}/{newVersion.Key}");
         Assert.That(newVersionBranch, Is.Not.Null, "Should name the branch after the new version");
     }
@@ -29,8 +29,8 @@ internal sealed class NewVersionTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
-        var milestones = await repo.Milestones();
+        await repo.CreateNewVersion(newVersion, ct: default);
+        var milestones = await repo.Milestones(ct: default);
         var milestone = milestones.FirstOrDefault(m => m.Title == $"xti_{newVersion.Type}_{newVersion.Key}");
         Assert.That(milestone, Is.Not.Null, "Should create milestone for new version");
     }

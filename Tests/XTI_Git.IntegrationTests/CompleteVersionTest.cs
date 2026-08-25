@@ -16,12 +16,12 @@ public sealed class CompleteVersionTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Minor", "V1169");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         var gitRepo = getGitRepo(services);
         await gitRepo.CheckoutBranch(newVersion.BranchName().Value);
         const string issueTitle = "Test Complete Version";
-        var issue = await repo.CreateIssue(newVersion, issueTitle);
-        await repo.StartIssue(newVersion, issue.Number);
+        var issue = await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.StartIssue(newVersion, issue.Number, ct: default);
         await gitRepo.CheckoutBranch(issue.BranchName().Value);
         var changedLine = Guid.NewGuid().ToString("N");
         using (var writer = new StreamWriter(Path.Combine(gitRepoPath, "test_V6_issue.txt"), true))
@@ -29,7 +29,7 @@ public sealed class CompleteVersionTest
             await writer.WriteLineAsync(changedLine);
         }
         await gitRepo.CommitChanges($"Complete version test issue: {changedLine}");
-        await repo.CompleteIssue(issue.BranchName());
+        await repo.CompleteIssue(issue.BranchName(), ct: default);
         await gitRepo.CheckoutBranch(newVersion.BranchName().Value);
         gitRepo.DeleteBranch(issue.BranchName().Value);
         changedLine = Guid.NewGuid().ToString("N");
@@ -38,7 +38,7 @@ public sealed class CompleteVersionTest
             await writer.WriteLineAsync(changedLine);
         }
         await gitRepo.CommitChanges($"Complete version test: {changedLine}");
-        await repo.CompleteVersion(newVersion.BranchName());
+        await repo.CompleteVersion(newVersion.BranchName(), ct: default);
         var repoInfo = await repo.RepositoryInformation();
         await gitRepo.CheckoutBranch(repoInfo.DefaultBranch);
         gitRepo.DeleteBranch(newVersion.BranchName().Value);
@@ -50,7 +50,7 @@ public sealed class CompleteVersionTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Minor", "V1169");
-        await repo.CompleteVersion(newVersion.BranchName());
+        await repo.CompleteVersion(newVersion.BranchName(), ct: default);
     }
 
     private IServiceProvider setup()

@@ -9,7 +9,7 @@ public sealed class XtiIssueBranchName : XtiBranchName
 
     private static readonly Regex whitespaceRegex = new Regex("\\s+");
 
-    public static bool CanParse(string text) => regex.IsMatch(text);
+    public static new bool CanParse(string text) => regex.IsMatch(text);
 
     public static new XtiIssueBranchName Parse(string text)
     {

@@ -16,10 +16,10 @@ internal sealed class NewIssueTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         const string issueTitle = "Test Issue";
-        await repo.CreateIssue(newVersion, issueTitle);
-        var issues = await repo.Issues();
+        await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        var issues = await repo.Issues(ct: default);
         Assert.That(issues.Length, Is.EqualTo(1), "Should create new issue");
         Assert.That(issues[0].Title, Is.EqualTo(issueTitle), "Should create new issue");
     }
@@ -30,11 +30,11 @@ internal sealed class NewIssueTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         const string issueTitle = "Test Issue";
-        await repo.CreateIssue(newVersion, issueTitle);
-        await repo.CreateIssue(newVersion, issueTitle);
-        var issues = await repo.Issues();
+        await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        var issues = await repo.Issues(ct: default);
         Assert.That(issues.Length, Is.EqualTo(1), "Should not create duplicate open issue with the same title");
     }
 
@@ -44,12 +44,12 @@ internal sealed class NewIssueTest
         var services = setup();
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V1");
-        await repo.CreateNewVersion(newVersion);
+        await repo.CreateNewVersion(newVersion, ct: default);
         const string issueTitle = "Test Issue";
-        await repo.CreateIssue(newVersion, issueTitle);
-        var issues = await repo.Issues();
-        await repo.StartIssue(newVersion, issues[0].Number);
-        issues = await repo.Issues();
+        await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        var issues = await repo.Issues(ct: default);
+        await repo.StartIssue(newVersion, issues[0].Number, ct: default);
+        issues = await repo.Issues(ct: default);
         Assert.That(issues[0].Labels, Has.One.EqualTo("in progress"), "Should add in progress label when starting issue");
     }
 

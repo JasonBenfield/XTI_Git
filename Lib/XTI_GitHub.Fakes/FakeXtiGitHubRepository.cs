@@ -14,9 +14,9 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
     protected override Task<GitHubRepo> _RepositoryInformation() =>
         Task.FromResult(new GitHubRepo(repoName, $"https://example.com/{repoOwner}/{repoName}.git", "main"));
 
-    protected override Task<string[]> _Branches() => Task.FromResult(branches.ToArray());
+    protected override Task<string[]> _Branches(CancellationToken ct) => Task.FromResult(branches.ToArray());
 
-    protected override Task _CreateBranch(string name)
+    protected override Task _CreateBranch(string name, CancellationToken ct)
     {
         branches.Add(name);
         return Task.CompletedTask;
@@ -26,7 +26,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     private int milestoneNumber = 321;
 
-    protected override Task _CreateMilestone(string name, string description)
+    protected override Task _CreateMilestone(string name, string description, CancellationToken ct)
     {
         milestones.Add
         (
@@ -36,17 +36,17 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.CompletedTask;
     }
 
-    protected override Task<GitHubMilestone> _Milestone(int number)
+    protected override Task<GitHubMilestone> _Milestone(int number, CancellationToken ct)
         => Task.FromResult(milestones.FirstOrDefault(m => m.Number == number) ?? new GitHubMilestone(0, "", ""));
 
-    protected override Task<GitHubMilestone[]> _Milestones()
+    protected override Task<GitHubMilestone[]> _Milestones(CancellationToken ct)
         => Task.FromResult(milestones.ToArray());
 
     private readonly List<GitHubIssue> issues = new();
 
     private int issueNumber = 234;
 
-    protected override Task<GitHubIssue[]> _Issues(FilterIssueRequest request)
+    protected override Task<GitHubIssue[]> _Issues(FilterIssueRequest request, CancellationToken ct)
         => Task.FromResult(issues.Where(i => isMatch(request, i)).ToArray());
 
     private bool isMatch(FilterIssueRequest request, GitHubIssue issue)
@@ -62,9 +62,9 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return true;
     }
 
-    protected override async Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle)
+    protected override async Task<GitHubIssue> _CreateIssue(int milestoneNumber, string issueTitle, CancellationToken ct)
     {
-        var milestone = await _Milestone(milestoneNumber);
+        var milestone = await _Milestone(milestoneNumber, ct);
         var gitHubIssue = new GitHubIssue
         (
             issueNumber,
@@ -82,31 +82,31 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     private readonly List<string> labels = new List<string>();
 
-    protected override Task<bool> _LabelExists(string name)
+    protected override Task<bool> _LabelExists(string name, CancellationToken ct)
     {
         var exists = labels.Any(l => l == name);
         return Task.FromResult(exists);
     }
 
-    protected override Task _CreateLabel(string name, string color)
+    protected override Task _CreateLabel(string name, string color, CancellationToken ct)
     {
         labels.Add(name);
         return Task.CompletedTask;
     }
 
-    protected override Task<GitHubIssue> _Issue(int number)
+    protected override Task<GitHubIssue> _Issue(int number, CancellationToken ct)
     {
         var issue = issues.FirstOrDefault(iss => iss.Number == number);
         return Task.FromResult
         (
             issue
-            ?? new GitHubIssue(0, "", "", new GitHubMilestone(0, "", ""), "Open", new string[0], new string[0])
+            ?? new GitHubIssue(0, "", "", new GitHubMilestone(0, "", ""), "Open", [], [])
         );
     }
 
-    protected override async Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate)
+    protected override async Task _UpdateIssue(GitHubIssue ghIssue, GitHubIssueUpdate ghIssueUpdate, CancellationToken ct)
     {
-        var milestone = await _Milestone(ghIssueUpdate.MilestoneNumber ?? 0);
+        var milestone = await _Milestone(ghIssueUpdate.MilestoneNumber ?? 0, ct);
         var updatedIssue = ghIssue with
         {
             Milestone = milestone,
@@ -125,12 +125,12 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
 
     private readonly List<GitHubPullRequest> pullRequests = new List<GitHubPullRequest>();
 
-    protected override Task<GitHubPullRequest[]> _PullRequests()
+    protected override Task<GitHubPullRequest[]> _PullRequests(CancellationToken ct)
         => Task.FromResult(pullRequests.ToArray());
 
     private int pullRequestID = 454;
 
-    protected override Task<GitHubPullRequest> _CreatePullRequest(string title, string body, string head, string baseRef)
+    protected override Task<GitHubPullRequest> _CreatePullRequest(string title, string body, string head, string baseRef, CancellationToken ct)
     {
         var pullRequest = new GitHubPullRequest(pullRequestID, title, body, head, baseRef, "Open");
         pullRequests.Add(pullRequest);
@@ -138,7 +138,7 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.FromResult(pullRequest);
     }
 
-    protected override Task _MergePullRequest(GitHubPullRequest pullRequest)
+    protected override Task _MergePullRequest(GitHubPullRequest pullRequest, CancellationToken ct)
     {
         var updatedPullRequest = pullRequest with { State = "Closed" };
         pullRequests.RemoveAll(pr => pr.Number == pullRequest.Number);
@@ -146,12 +146,12 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
         return Task.CompletedTask;
     }
 
-    protected override Task _LinkPullRequest(GitHubPullRequest ghPullRequest, GitHubIssue ghIssue)
+    protected override Task _LinkPullRequest(GitHubPullRequest ghPullRequest, GitHubIssue ghIssue, CancellationToken ct)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task _CloseMilestone(GitHubMilestone milestone)
+    protected override Task _CloseMilestone(GitHubMilestone milestone, CancellationToken ct)
     {
         var updated = milestone with { State = "Closed" };
         milestones.RemoveAll(m => m.Number == milestone.Number);
@@ -162,45 +162,45 @@ internal sealed class FakeXtiGitHubRepository : XtiGitHubRepository
     private int releaseID = 2233;
     private readonly List<GitHubRelease> releases = new();
 
-    protected override Task<GitHubRelease?> _LatestRelease()
+    protected override Task<GitHubRelease?> _LatestRelease(CancellationToken ct)
     {
         var release = releases.LastOrDefault();
         return Task.FromResult(release);
     }
 
-    protected override Task<GitHubRelease?> _Release(string tagName)
+    protected override Task<GitHubRelease?> _Release(string tagName, CancellationToken ct)
     {
         var release = releases.FirstOrDefault(r => r.TagName == tagName);
         return Task.FromResult(release);
     }
 
-    protected override Task DeleteRelease(GitHubRelease gitHubRelease)
+    protected override Task DeleteRelease(GitHubRelease gitHubRelease, CancellationToken ct)
     {
         releases.RemoveAll(r => r.ID == gitHubRelease.ID);
         return Task.CompletedTask;
     }
 
-    protected override Task<GitHubRelease> _CreateRelease(string tagName, string name, string body)
+    protected override Task<GitHubRelease> _CreateRelease(string tagName, string name, string body, CancellationToken ct)
     {
-        var release = new GitHubRelease(releaseID, tagName, new GitHubReleaseAsset[0]);
+        var release = new GitHubRelease(releaseID, tagName, []);
         releaseID++;
         releases.Add(release);
         return Task.FromResult(release);
     }
 
-    protected override Task DeleteReleaseAsset(GitHubReleaseAsset asset) => Task.CompletedTask;
+    protected override Task DeleteReleaseAsset(GitHubReleaseAsset asset, CancellationToken ct) => Task.CompletedTask;
 
-    protected override Task _UploadReleaseAsset(GitHubRelease release, GitHubFileUpload asset)
+    protected override Task _UploadReleaseAsset(GitHubRelease release, GitHubFileUpload asset, CancellationToken ct)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task _FinalizeRelease(GitHubRelease release)
+    protected override Task _FinalizeRelease(GitHubRelease release, CancellationToken ct)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset)
+    protected override Task<byte[]> _DownloadReleaseAsset(GitHubReleaseAsset asset, CancellationToken ct)
     {
         return Task.FromResult(new byte[0]);
     }

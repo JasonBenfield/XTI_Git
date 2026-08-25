@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using System.Text.Json;
 using XTI_Core.Extensions;
 using XTI_GitHub;
 
@@ -16,7 +15,7 @@ internal sealed class RepositoryTest
         var services = Setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
         var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
-        var repo = await gitHubRepo.Issue(280);
+        var repo = await gitHubRepo.Issue(280, ct: default);
         repo.WriteToConsole();
     }
 
@@ -26,9 +25,9 @@ internal sealed class RepositoryTest
         var services = Setup();
         var gitHubFactory = services.GetRequiredService<IGitHubFactory>();
         var gitHubRepo = gitHubFactory.CreateGitHubRepository("GreerCPW", "Gis");
-        var release = await gitHubRepo.Release("v1.2.21");
+        var release = await gitHubRepo.Release("v1.2.21", ct: default);
         var asset = release.Assets.First();
-        var bytes = await gitHubRepo.DownloadReleaseAsset(asset);
+        var bytes = await gitHubRepo.DownloadReleaseAsset(asset, ct: default);
         var fileName = $"c:\\xti\\{asset.Name}";
         if (File.Exists(fileName))
         {

@@ -17,8 +17,8 @@ internal sealed class NewIssueBusinessTest
         var repo = getGitHubRepo(services);
         var newVersion = new XtiGitVersion("Patch", "V13");
         const string issueTitle = "Test Issue 1";
-        var createdIssue = await repo.CreateIssue(newVersion, issueTitle);
-        await repo.StartIssue(newVersion, createdIssue.Number);
+        var createdIssue = await repo.CreateIssue(newVersion, issueTitle, ct: default);
+        await repo.StartIssue(newVersion, createdIssue.Number, ct: default);
     }
 
     private IServiceProvider setup()
